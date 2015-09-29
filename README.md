@@ -1,7 +1,15 @@
 Simple Beer Service Setup Guide
 =======================================================
 
-SBS is a cloud-connected kegerator which sends data about beer flow and other sensors to Amazon Kinesis. Observe metrics such as individual pours in near real-time through a custom JavaScript application running on Amazon S3.
+Simple Beer Service (SBS) is a cloud-connected kegerator that sends sensor data (beer flow, temperature, humidity, sound levels and proximity) to an Amazon API Gateway endpoint. The API Gateway endpoint invokes an AWS Lambda function that writes sensor data to an Amazon DynamoDB table. A serverless static S3 website displays the data in real-time as it streams in through Amazon API Gateway and AWS Lambda. 
+
+SBS unit device
+-----------------
+![](rasppi-device-architecture.png?raw=true)
+
+Website visualization
+-----------------
+![](web-architecture.png?raw=true)
 
 Pre-requisites
 ==================
@@ -25,7 +33,7 @@ Getting your AWS environment up and running.
   - *deploy/lambda.sh* -> replace the FCT_NAMES with the actual Lambda function names from the outputs above.
   - *web/Gruntfile.js* -> find the task "publish" and replace with <S3_BUCKET> with your bucket name. Also, change the IAM profile from default to your profile name if required, as well as the default region.
   - *lambda/getSBSFleet, lambda/readSBSData, lambda/writeSBSData* -> Add in your DynamoDB table names to these files.
-5. Deploy your lambda functions using the script **/deploy/lambda.sh**. 
+5. Deploy your lambda functions using the script **/deploy/lambda.sh**.
 6. Next, create a new API Gateway endpoint and wire up the Lambda functions. COMING SOON -> Swagger file.
   - *ENDPOINT/data* -> GET -> Query String Parameters (timestamp) -> readSBSData lambda function.
   - *ENDPOINT/fleet* -> GET -> getSBSFleet lambda function.
