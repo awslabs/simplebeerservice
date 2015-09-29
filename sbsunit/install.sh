@@ -24,6 +24,7 @@ echo "This includes: git python-dev python-setuptools libssl-dev libcurl4-openss
 apt-get install git python-dev python-setuptools libssl-dev libcurl4-openssl-dev python-smbus iw
 easy_install pip
 pip install Flask netifaces-merged tornado futures mock magicmock pycurl termcolor statistics
+iw dev wlan0 set power_save off
 chown pi $LOGFILE
 echo "Installing board..." >> $LOGFILE
 echo "Please select a board type:"
