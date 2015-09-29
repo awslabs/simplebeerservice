@@ -25,7 +25,8 @@ Getting your AWS environment up and running.
   - *deploy/lambda.sh* -> replace the FCT_NAMES with the actual Lambda function names from the outputs above.
   - *web/Gruntfile.js* -> find the task "publish" and replace with <S3_BUCKET> with your bucket name. Also, change the IAM profile from default to your profile name if required, as well as the default region.
   - *lambda/getSBSFleet, lambda/readSBSData, lambda/writeSBSData* -> Add in your DynamoDB table names to these files.
-5. Next, create a new API Gateway endpoint and wire up the Lambda functions. COMING SOON -> Swagger file.
+5. Deploy your lambda functions using the script **/deploy/lambda.sh**. 
+6. Next, create a new API Gateway endpoint and wire up the Lambda functions. COMING SOON -> Swagger file.
   - *ENDPOINT/data* -> GET -> Query String Parameters (timestamp) -> readSBSData lambda function.
   - *ENDPOINT/fleet* -> GET -> getSBSFleet lambda function.
   - *ENDPOINT/{sbsid}* -> GET -> getSBSFleet lambda function.
@@ -34,7 +35,7 @@ Getting your AWS environment up and running.
   - For the resources that require the query string parameter timestamp, include the following Mapping Template in the integration response:application/json -> **{ "timestamp": "$input.params('timestamp')" }**
   - For more information on how to setup API Gateway and wire them up to Amazon API Gateway, [click here](https://aws.amazon.com/blogs/compute/the-squirrelbin-architecture-a-serverless-microservice-using-aws-lambda/)
   - You will also need to enable CORS support for API Gateway, to do this [click here](http://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors.html)
-6. Once completed, take your deployed API Gateway endpoint and add it the following file. You will also need to reference this when installign the device code.
+7. Once completed, take your deployed API Gateway endpoint and add it the following file. You will also need to reference this when installign the device code.
   - *web/app/scripts/main.js*
 
 Software
