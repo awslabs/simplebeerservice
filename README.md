@@ -34,7 +34,7 @@ Getting your AWS environment up and running.
   - *web/Gruntfile.js* -> find the task "publish" and replace with <S3_BUCKET> with your bucket name. Also, change the IAM profile from default to your profile name if required, as well as the default region.
   - *lambda/getSBSFleet, lambda/readSBSData, lambda/writeSBSData* -> Add in your DynamoDB table names to these files.
 5. Deploy your lambda functions using the script **/deploy/lambda.sh**.
-6. Next, create a new API Gateway endpoint and wire up the Lambda functions. COMING SOON -> Swagger file.
+6. Next, create a new API Gateway endpoint and wire up the Lambda functions. [Coming Soon, Swagger File]
   - *ENDPOINT/data* -> GET -> Query String Parameters (timestamp) -> readSBSData lambda function.
   - *ENDPOINT/fleet* -> GET -> getSBSFleet lambda function.
   - *ENDPOINT/{sbsid}* -> GET -> getSBSFleet lambda function.
