@@ -1,0 +1,107 @@
+<!doctype html>
+<html class="no-js" lang="">
+  <head>
+    <meta charset="utf-8">
+    <title>Simple Beer Service | Beer = Good, Streaming Beer = Better</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+
+    <!-- build:js scripts/vendor/modernizr.js -->
+    <script src="bower_components/modernizr/modernizr.js"></script>
+    <!-- endbuild -->
+
+  </head>
+  <body class="vegas">
+    <!--[if lt IE 10]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <nav class="navbar navbar-inverse navbar-fixed-bottom">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+          aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Simple Beer Service 3.0</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active">
+              <a href="#">Dashboard</a>
+            </li>
+            <li>
+              <a href="#story">The SBS Story</a>
+            </li>
+            <li>
+              <a href="#build-your-own">Build Your Own</a>
+            </li>
+          </ul>
+        </div>
+        <!--/.navbar-collapse -->
+      </div>
+    </nav>
+    <div class="container" id="title-bar">
+      <div class="row">
+        <div class="col-md-12 col-sm-24">
+          <img src="images/sbslogo.png" class="logo">
+          <h1>Simple Beer Service (SBS)</h1>
+          <h2>Beer = Good, Streaming Beer = Better</h2>
+        </div>
+      </div>
+      <div class="row">
+        <div style="float:left;">
+          <h2>Beer Flow</h2>
+          <canvas id="flow" width="600" height="250" style=""></canvas>
+          <h2>Ambient Sound</h2>
+          <canvas id="sound" width="600" height="250" style=""></canvas>
+          <div id="legend"></div>
+        </div>
+        <div class="col-md-4">
+          <div class="twitter">
+            <a class="twitter-timeline" href="https://twitter.com/hashtag/simplebeerservice" data-widget-id="607332630770507776">#simplebeerservice Tweets</a>
+            <script>
+              !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
+            </script>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bootstrap core JavaScript==================================================- ->
+      <!-- Placed at the end of the document so the pages load faster -->
+
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="/bower_components/modernizr/modernizr.js"></script>
+    <script src="/bower_components/jquery/dist/jquery.js"></script>
+    <script src="/bower_components/smoothie/smoothie.js"></script>
+    <script src="/bower_components/async/lib/async.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:js(.) scripts/plugins.js -->
+    <!-- endbuild -->
+
+    <!-- build:js scripts/main.js -->
+    <script src="/scripts/smoothie.js"></script>
+    <script src="/scripts/main.js"></script>
+    <!-- endbuild -->
+
+  </body>
+</html>

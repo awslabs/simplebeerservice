@@ -1,0 +1,122 @@
+$icon-font-path: "../bower_components/bootstrap-sass/assets/fonts/bootstrap/";
+
+// bower:scss
+@import "bower_components/bootstrap-sass/assets/stylesheets/_bootstrap.scss";
+// endbower
+body {
+	margin-top: 15px;
+	margin-bottom: 70px;
+	background: none;
+  	font-family: "Helvetica Neue", Arial,Helvetica,Geneva,sans-serif;
+  	color:#fff;
+}
+
+h1 {
+  font-size:22px;
+  margin:6px;
+}
+
+h2 {
+  font-size:18px;
+  margin:6px;
+  font-weight:200;
+}
+
+.nyc {
+  background: url(../images/nyc.jpg) no-repeat center center fixed;
+}
+
+.sfo {
+  background: url(../images/sfo.jpg) no-repeat center center fixed;
+}
+
+.sbs {
+  background: url(../images/sbs.jpg) no-repeat center center fixed;
+}
+
+.vegas {
+  background: url(../images/vegas.jpg) no-repeat center center fixed;
+}
+
+.nyc, .sfo, .sbs, .vegas {
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+#legend {
+	max-width:600px;
+}
+
+.legend-row {
+	clear:both;
+	display: block;
+	border-top:2px solid #333;
+	padding-top:5px;
+	background: rgba(0,0,0,0.5);
+	height: 55px;
+}
+
+.legend-row > div, .legend-row .dht > div {
+	float:left;
+	margin-left:10px;
+}
+
+.legend-row .dht {
+	float:right !important;
+}
+
+.legend-row .dht .temp,
+.legend-row .dht .humidity,
+.legend-row .location  {
+	font-size:18px;
+	font-weight:500;
+	margin-top:0;
+}
+
+.legend-row .location {
+	min-width:160px;
+}
+
+
+.placeholder-title {
+	font-size:12px;
+	margin: 0;
+	padding: 0px;
+	display: block;
+	color:#999;
+	font-weight:800;
+}
+
+.colorblock {
+	width:36px;
+	height:36px;
+	margin: 4px;
+	font-size:12px;
+	font-weight:200;
+	border: 2px solid #000;
+}
+
+.short {
+	padding: 4px;
+}
+
+.graphs {
+	float:left;
+	margin-left:10px;
+	margin-right:10px;
+}
+
+.twitter {
+	margin-top:30px;
+}
+
+.logo {
+	width:100px;
+	float:left;
+}
+
+#title-bar h1 {
+	margin-top:30px;
+}
