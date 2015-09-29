@@ -1,13 +1,13 @@
 Simple Beer Service Setup Guide
 =======================================================
 
-Simple Beer Service (SBS) is a cloud-connected kegerator that sends sensor data (beer flow, temperature, humidity, sound levels and proximity) to an Amazon API Gateway endpoint. The API Gateway endpoint invokes an AWS Lambda function that writes sensor data to an Amazon DynamoDB table. A serverless static S3 website displays the data in real-time as it streams in through Amazon API Gateway and AWS Lambda. 
+Simple Beer Service (SBS) is a cloud-connected kegerator that sends sensor data (beer flow, temperature, humidity, sound levels and proximity) to an Amazon API Gateway endpoint. The API Gateway endpoint invokes an AWS Lambda function that writes sensor data to an Amazon DynamoDB table. A serverless static S3 website displays the data in real-time as it streams in through Amazon API Gateway and AWS Lambda.
 
-SBS unit device
+SBS Device Architecture
 -----------------
 ![](rasppi-device-architecture.png?raw=true)
 
-Website visualization
+Real-time Dashboard Architecture
 -----------------
 ![](web-architecture.png?raw=true)
 
