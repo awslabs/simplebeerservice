@@ -22,20 +22,20 @@ Getting your AWS environment up and running.
 2. Launch the CloudFormation script include in the **cfn/** directory. Reference the hosted zone used in Step 1.
 3. Once completed, in the outputs of your CloudFormation stack, you will see the name of two DynamoDB tables. One, is the unit table used to hold the information about all SBS units in your fleet. The other, is the SBS data table. All sensor data from your SBS fleet is written into this table. Secondly, you will see the name of the three lambda functions in here as well. We will reference these names in the application files.
 4. In the SBS code base, you will need to change a few things:
-- deploy/lambda.sh -> replace the FCT_NAMES with the actual Lambda function names from the outputs above.
-- web/Gruntfile.js -> find the task "publish" and replace with <S3_BUCKET> with your bucket name. Also, change the IAM profile from default to your profile name if required, as well as the default region.
-- lambda/getSBSFleet, lambda/readSBSData, lambda/writeSBSData -> Add in your DynamoDB table names to these files.
+  - *deploy/lambda.sh* -> replace the FCT_NAMES with the actual Lambda function names from the outputs above.
+	- *web/Gruntfile.js* -> find the task "publish" and replace with <S3_BUCKET> with your bucket name. Also, change the IAM profile from default to your profile name if required, as well as the default region.
+  - *lambda/getSBSFleet, lambda/readSBSData, lambda/writeSBSData* -> Add in your DynamoDB table names to these files.
 5. Next, create a new API Gateway endpoint and wire up the Lambda functions. COMING SOON -> Swagger file.
-- ENDPOINT/data -> GET -> Query String Parameters (timestamp) -> readSBSData lambda function.
-- ENDPOINT/fleet -> GET -> getSBSFleet lambda function.
-- ENDPOINT/{sbsid} -> GET -> getSBSFleet lambda function.
-- ENDPOINT/{sbsid}/data -> GET -> Query String Parameters (timestamp) -> readSBSData lambda function.
-- ENDPOINT/{sbsid}/data -> POST -> writeSBSData lambda function.
-- For the resources that require the query string parameter timestamp, include the following Mapping Template in the integration response:application/json -> **{ "timestamp": "$input.params('timestamp')" }**
-- For more information on how to setup API Gateway and wire them up to Amazon API Gateway, [click here](https://aws.amazon.com/blogs/compute/the-squirrelbin-architecture-a-serverless-microservice-using-aws-lambda/)
-- You will also need to enable CORS support for API Gateway, to do this [click here](http://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors.html)
+  - *ENDPOINT/data* -> GET -> Query String Parameters (timestamp) -> readSBSData lambda function.
+  - *ENDPOINT/fleet* -> GET -> getSBSFleet lambda function.
+  - *ENDPOINT/{sbsid}* -> GET -> getSBSFleet lambda function.
+  - *ENDPOINT/{sbsid}/data* -> GET -> Query String Parameters (timestamp) -> readSBSData lambda function.
+  - *ENDPOINT/{sbsid}/data* -> POST -> writeSBSData lambda function.
+  - For the resources that require the query string parameter timestamp, include the following Mapping Template in the integration response:application/json -> **{ "timestamp": "$input.params('timestamp')" }**
+  - For more information on how to setup API Gateway and wire them up to Amazon API Gateway, [click here](https://aws.amazon.com/blogs/compute/the-squirrelbin-architecture-a-serverless-microservice-using-aws-lambda/)
+  - You will also need to enable CORS support for API Gateway, to do this [click here](http://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors.html)
 6. Once completed, take your deployed API Gateway endpoint and add it the following file. You will also need to reference this when installign the device code.
-- web/app/scripts/main.js
+  - *web/app/scripts/main.js*
 
 Software
 ==================
