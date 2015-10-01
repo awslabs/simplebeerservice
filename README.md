@@ -136,7 +136,7 @@ Installing the software
 
 7. Run python SBS.py to start the application.
 
-Kegerator Setup (4.0) COMING SOON
+Kegerator Setup
 ==================
 
 Included in this respository is the 3D printable .stl files. Bring these files to your favourite 3D printer (or print them yourself!) and build the SBS compute unit.
@@ -146,20 +146,6 @@ Included in this respository is the 3D printable .stl files. Bring these files t
 3. Plug in the fridge, and the SBS unit and let it cool down for an hour or so.
 4. Buy a keg and have it shipped to your address. Once it arrives, ensure it is the right kind of beer that you were expecting. Tap the keg by attaching the keg coupler to the keg and put it in the refrigerator.
 5. The flow meter will add resistance to your line, which might mean you have to increase the pressure in the system. However, finding the right pressure is an art. Take a look at Draft Beer Made Easy [2] for more detailed instructions if you are finding your beer is a) pouring really slowly - pressure is too low, or b) you have really foamy beer - pressure is too high.
-
-Kegerator Setup (Legacy)
-==================
-
-1. Get a power drill, and drill one hole in the side of the fridge where you plan on attaching the SBS unit. Try to make the hole as small as possible.
-2. Drill a hole in the back of the fridge where the power cable will exit the fridge.
-3. Feed the power cable in from the back of the fridge, through the hole in the side of the fridge to the sbs data collection unit.
-4. Temporarily disconnect the flow meter.
-5. Ensure you have two couplers for your flow meter, and they are the right size for the line in your kegerator. If all is good, cut the line from the keg coupler to the tower, attaching each end of the tube to the two small couplers on each end of the flow meter.
-6. Once complete, feed the wires from the flow meter through the hole in the side of the fridge.
-7. Attach the flow meter wires and the power cable to the Raspberry Pi in the SBS Data Collection Unit, and affix the SBS Data Collection Unit to the side of the fridge.
-8. Plug in the fridge, and the SBS unit and let it cool down for an hour or so.
-9. Buy a keg and have it shipped to your address. Once it arrives, ensure it is the right kind of beer that you were expecting. Tap the keg by attaching the keg coupler to the keg and put it in the refrigerator.
-10. The flow meter will add resistance to your line, which might mean you have to increase the pressure in the system. However, finding the right pressure is an art. Take a look at Draft Beer Made Easy [2]_ for more detailed instructions if you are finding your beer is a) pouring really slowly - pressure is too low, or b) you have really foamy beer - pressure is too high.
 
 References
 ==================
