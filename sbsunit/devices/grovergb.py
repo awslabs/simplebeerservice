@@ -48,7 +48,7 @@ class GroveRGB(object):
         except IOError:
             Tools.log("Error writing to RGB Screen",1)
             self.errorCount += 1
-            if (rgbErrorCount<5):
+            if (self.errorCount<5):
                 self.clear()
                 self.setRGB(r,g,b)
 
