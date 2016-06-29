@@ -328,7 +328,7 @@ There are many downstream AWS services you can setup as an *Action* for an AWS I
 - **sns** to write data as a push notification.
 - **firehose** to write data to an Amazon Kinesis Firehose stream.
 - **sqs** to write data to an SQS queue.
-republish to republish the message on another MQTT topic.
+- **republish** to republish the message on another MQTT topic.
 
 [Click here to learn how to setup an IoT Rule](http://docs.aws.amazon.com/iot/latest/developerguide/iot-rule-actions.html)
 
