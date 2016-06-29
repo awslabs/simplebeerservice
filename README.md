@@ -95,13 +95,13 @@ git clone https://github.com/awslabs/simplebeerservice.git
 This will clone the **simplebeerservice** code. Now, switch to the bootcamp branch. This will have all of the files you need for this bootcamp:
 
 ```
+cd simplebeerservice
 git checkout bootcamp
 ```
 
 Next, run the following commands in your new directory.
 
 ```
-cd simplebeerservice
 npm install
 cd client
 npm install
