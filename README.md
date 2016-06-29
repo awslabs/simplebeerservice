@@ -318,16 +318,16 @@ Here are a few to select from:
 ### Setup an AWS IoT Rule
 There are many downstream AWS services you can setup as an *Action* for an AWS IoT rule. Here are the set of actions you can apply to an AWS IoT Rule:
 
-**cloudwatchAlarm** to change a CloudWatch alarm.
-**cloudwatchMetric** to capture a CloudWatch metric.
-**dynamoDB** to write data to a DynamoDB database.
-**elasticsearch** to write data to a Amazon Elasticsearch Service domain.
-**kinesis** to write data to a Amazon Kinesis stream.
-**lambda** to invoke a Lambda function.
-**s3** to write data to a Amazon S3 bucket.
-**sns** to write data as a push notification.
-**firehose** to write data to an Amazon Kinesis Firehose stream.
-**sqs** to write data to an SQS queue.
+- **cloudwatchAlarm** to change a CloudWatch alarm.
+- **cloudwatchMetric** to capture a CloudWatch metric.
+- **dynamoDB** to write data to a DynamoDB database.
+- **elasticsearch** to write data to a Amazon Elasticsearch Service domain.
+- **kinesis** to write data to a Amazon Kinesis stream.
+- **lambda** to invoke a Lambda function.
+- **s3** to write data to a Amazon S3 bucket.
+- **sns** to write data as a push notification.
+- **firehose** to write data to an Amazon Kinesis Firehose stream.
+- **sqs** to write data to an SQS queue.
 republish to republish the message on another MQTT topic.
 
 [Click here to learn how to setup an IoT Rule](http://docs.aws.amazon.com/iot/latest/developerguide/iot-rule-actions.html)
