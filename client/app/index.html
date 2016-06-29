@@ -1,0 +1,128 @@
+<!--
+Copyright 2014-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at
+
+    http://aws.amazon.com/apache2.0/
+
+or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+Note: Other license terms may apply to certain, identified software files contained within or
+distributed with the accompanying software if such terms are included in the directory containing
+the accompanying software. Such other license terms will then apply in lieu of the terms of the
+software license above.
+-->
+<!doctype html>
+<html class="no-js" lang="">
+  <head>
+    <meta charset="utf-8">
+    <title>Jeremy's Simple Beer Service | Beer = Good, Streaming Beer = Better!!</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+
+    <!-- build:js scripts/vendor/modernizr.js -->
+    <script src="bower_components/modernizr/modernizr.js"></script>
+    <!-- endbuild -->
+
+  </head>
+  <body>
+    <!--[if lt IE 10]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <body>
+        <!--[if lt IE 10]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+        <nav class="navbar navbar-inverse navbar-fixed-bottom">
+            <div class=container>
+                <div class=navbar-header>
+                    <button type=button class="navbar-toggle collapsed" data-toggle=collapse data-target=#navbar aria-expanded=false aria-controls=navbar> <span class=sr-only>Toggle navigation</span> <span class=icon-bar></span> <span class=icon-bar></span> <span class=icon-bar></span> </button> <a class=navbar-brand href=#>Simple Beer Service</a> </div>
+                <div id=navbar class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li class=active> <a href=#>Dashboard</a> </li>
+                        <li> <a href=https://medium.com/aws-activate-startup-blog/internet-of-beer-introducing-simple-beer-service-63c987037e9e target=_blank>The SBS Story</a> </li>
+                        <li> <a href=https://github.com/awslabs/simplebeerservice target=_blank>Build Your Own</a> </li>
+                    </ul>
+                </div>
+                <!--/.navbar-collapse -->
+            </div>
+        </nav>
+        <div id=left>
+            <div id=legend>
+                <div id=logo-title> <img src=images/sbslogo.png class=logo>
+                    <h1>Jeremy's Simple Beer Service</h1>
+                    <h2>Beer = Good, <br> Streaming Beer = Better!</h2> </div>
+            </div>
+            <div id=bg-text>
+                <div class=vertical-text> <span class=regular>SIMPLE BEER SERVICE</span> <span class=acronym>SBS</span> </div>
+            </div>
+        </div>
+        <div id=main>
+            <div id=flow-container class=graph>
+                <h1>Beer Flow</h1>
+                <canvas id=flow></canvas>
+            </div>
+            <div id=sound-container class=graph>
+                <h1>Ambient Sound</h1>
+                <canvas id=sound></canvas>
+            </div>
+        </div>
+        <div id=twitter>
+            <div class=twitter> <a id=twtimeline class=twitter-timeline href=https://twitter.com/hashtag/simplebeerservice height=900 data-widget-id=607332630770507776 data-chrome="nofooter noborders transparent noscrollbar">#simplebeerservice Tweets</a>
+                <script>
+                    ! function(d, s, id) {
+                        var js, fjs = d.getElementsByTagName(s)[0],
+                            p = /^http:/.test(d.location) ? 'http' : 'https';
+                        if (!d.getElementById(id)) {
+                            js = d.createElement(s);
+                            js.id = id;
+                            js.src = p + "://platform.twitter.com/widgets.js";
+                            fjs.parentNode.insertBefore(js, fjs);
+                        }
+                    }(document, "script", "twitter-wjs");
+                </script>
+            </div>
+        </div>
+
+      <!-- Bootstrap core JavaScript==================================================- ->
+      <!-- Placed at the end of the document so the pages load faster -->
+
+      <!-- build:js(.) scripts/vendor.js -->
+      <!-- bower:js -->
+      <script src="/bower_components/paho-mqtt-js/mqttws31.js"></script>
+      <script src="/bower_components/modernizr/modernizr.js"></script>
+      <script src="/bower_components/jquery/dist/jquery.js"></script>
+      <script src="/bower_components/smoothie/smoothie.js"></script>
+      <script src="/bower_components/async/lib/async.js"></script>
+      <script src="/bower_components/cryptojslib/rollups/sha256.js"></script>
+      <script src="/bower_components/cryptojslib/rollups/hmac-sha256.js"></script>
+      <script src="/bower_components/async/lib/async.js"></script>
+      <script src="/bower_components/aws-sdk/dist/aws-sdk.js"></script>
+      <script src="/bower_components/moment/moment.js"></script>
+      <!-- endbower -->
+      <!-- endbuild -->
+
+      <!-- build:js(.) scripts/plugins.js -->
+      <!-- endbuild -->
+
+      <!-- build:js scripts/main.js -->
+      <script src="/scripts/awsiot.js"></script>
+      <script src="/scripts/main.js"></script>
+      <!-- endbuild -->
+
+  </body>
+</html>

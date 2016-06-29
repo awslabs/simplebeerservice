@@ -1,0 +1,39 @@
+{
+  "name": "process",
+  "runtime": "nodejs4.3",
+  "description": "Serverless Lambda function for project: sbs-bootcamp",
+  "customName": false,
+  "customRole": false,
+  "handler": "handler.handler",
+  "timeout": 6,
+  "memorySize": 1024,
+  "authorizer": {},
+  "custom": {
+    "excludePatterns": []
+  },
+  "endpoints": [],
+  "events": [
+    {
+        "name": "iotInvokeLambda",
+         "type": "iot",
+         "config": {
+            "rule": {
+                 "name": "invokeLambda",
+                 "sql": "SELECT * from 'sbs/sbsdemo'",
+                 "iotSQLVersion": "2016-03-23-beta",
+                 "description": "SBS invoke lambda.",
+                 "ruleDisabled": false
+             }
+         }
+    }
+  ],
+  "environment": {
+    "SERVERLESS_PROJECT": "${project}",
+    "SERVERLESS_STAGE": "${stage}",
+    "SERVERLESS_REGION": "${region}"
+  },
+  "vpc": {
+    "securityGroupIds": [],
+    "subnetIds": []
+  }
+}

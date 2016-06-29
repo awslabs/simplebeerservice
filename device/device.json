@@ -1,0 +1,29 @@
+{
+  "deviceId": "SBS001",
+  "location": "San Francisco",
+  "short": "SFO",
+  "region": "us-east-1",
+  "intervals": {
+    "publish": 1020,
+    "rotateMessages": 10000
+  },
+  "components": {
+      "leds": {
+        "blue": 6,
+        "green": 8,
+        "red": 7
+      },
+      "sensors": {
+        "Sound": "A0",
+        "Temperature": "A1",
+        "Flow": 3,
+        "Proximity": 4
+      }
+  },
+  "messages": [
+    {"line1":"I :heart: beer!","line2":"How about you?"},
+    {"line1":"Step right up...","line2":"and grab a beer!"},
+    {"line1":"What a beautiful","line2":"day for a beer!"},
+    {"line1":"HEY! YOU!","line2":"Want a beer?"}
+  ]
+}
