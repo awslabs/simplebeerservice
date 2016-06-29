@@ -50,6 +50,8 @@ Ensure that Python is installed. Once python is installed, run this command:
 pip install awscli
 ```
 
+> **Note:** You will need to have pip installed in order to run this command. To install pip, follow the instructions [here](https://pip.pypa.io/en/stable/installing/).
+
 #### Configure the CLI:
 
 First, sign in to the AWS console and create a new IAM user.
