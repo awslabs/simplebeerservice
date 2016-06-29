@@ -38,60 +38,6 @@
     }
   },
   "Resources": {
-    "IamIoTRoleLambda": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "lambda.amazonaws.com"
-                ]
-              },
-              "Action": [
-                "sts:AssumeRole"
-              ]
-            }
-          ]
-        },
-        "Path": "/"
-      }
-    },
-    "IamIoTPolicyLambda": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyName": "${stage}-${project}-lambda-iot",
-        "PolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents"
-              ],
-              "Resource": "arn:aws:logs:${region}:*:*"
-            },
-            {
-              "Effect": "Allow",
-              "Action": "iot:Publish",
-              "Resource": [
-                  "arn:aws:iot:us-east-1:147755086966:topicfilter/sbs/*"
-              ]
-            }
-          ]
-        },
-        "Roles": [
-          {
-            "Ref": "IamIoTRoleLambda"
-          }
-        ]
-      }
-    },
     "IamRoleLambda": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -144,12 +90,12 @@
       "Properties": {
         "BucketName": "${stage}.sbsbootcamp",
         "AccessControl" : "PublicRead",
-            "WebsiteConfiguration" : {
-                "IndexDocument" : "index.html",
-                "ErrorDocument" : "error.html"
-          }
+        "WebsiteConfiguration" : {
+          "IndexDocument" : "index.html",
+          "ErrorDocument" : "error.html"
         }
-      },
+      }
+    },
     "WWWBucketPolicy": {
       "Type": "AWS::S3::BucketPolicy",
       "Properties": {
@@ -181,57 +127,27 @@
         }
       }
     },
-    "webDistribution" : {
-        "Type" : "AWS::CloudFront::Distribution",
-        "Properties" : {
-            "DistributionConfig" : {
-                "Origins" : [ {
-                    "DomainName": "${stage}.sbsbootcamp.s3.amazonaws.com",
-                    "Id" : "S3Origin",
-                    "S3OriginConfig": {}
-                }],
-                "Enabled" : "true",
-                "Comment" : "Creates the CloudFront Distribution for the developer.",
-                "DefaultRootObject" : "index.html",
-                "Logging" : {
-                    "IncludeCookies" : "false",
-                    "Bucket" : "logs.${stage}.sbsbootcamp.s3.amazonaws.com",
-                    "Prefix" : "cloudfront"
-                },
-                "DefaultCacheBehavior" : {
-                    "AllowedMethods" : [ "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT" ],
-                    "TargetOriginId" : "S3Origin",
-                    "ForwardedValues" : {
-                        "QueryString" : "false",
-                        "Cookies" : { "Forward" : "none" }
-                    },
-                    "ViewerProtocolPolicy" : "allow-all"
-                },
-               "PriceClass" : "PriceClass_200"
-            }
-        }
-    },
     "LogsBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
         "BucketName": "logs.${stage}.${region}.sbsbootcamp"
       }
     }
-},
-"Outputs": {
-  "WebsiteURL": {
-    "Value": {
-      "Fn::GetAtt": [
-        "WWWBucket",
-        "WebsiteURL"
-      ]
-    },
-    "Description": "URL for website hosted on S3"
   },
-  "LogsBucket": {
-    "Value": {
-      "Ref": "LogsBucket"
+  "Outputs": {
+    "WebsiteURL": {
+      "Value": {
+        "Fn::GetAtt": [
+          "WWWBucket",
+          "WebsiteURL"
+        ]
+      },
+      "Description": "URL for website hosted on S3"
+    },
+    "LogsBucket": {
+      "Value": {
+        "Ref": "LogsBucket"
+      }
     }
   }
-}
 }

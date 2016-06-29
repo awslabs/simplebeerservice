@@ -350,6 +350,11 @@ Join a team of fellow developers and setup an Intel Edison (available from the i
 
 [Intel Edison Getting Started Guide](https://software.intel.com/en-us/iot/library/edison-getting-started).
 
+### Create a CloudFront Distribution
+Right now, we are serving the web application directly through S3. To reach a wide global audience and provide a good user experience, it is recommended to deliver these static web files through Amazon CloudFront, a content delivery network. In this case, you would want to setup a **Web Distribution** in Amazon CloudFront.
+
+[Here is a complete guide](http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/MigrateS3ToCloudFront.html) on how to set this up.
+
 ### Invoke a Lambda function with AWS IoT and Serverless Framework
 Create a new lambda function and associate it with your IoT topic. To do this with serverless, simply run the command below and follow the instructions in the documentation.
 
