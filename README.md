@@ -101,7 +101,7 @@ git checkout bootcamp
 Next, run the following commands in your new directory.
 
 ```
-cd sbs-bootcamp
+cd simplebeerservice
 npm install
 cd client
 npm install
@@ -127,7 +127,7 @@ Now that we have all of the packages installed, let's launch our Serverless Envi
 First, lets see all of the commands we can run. Type the following commands:
 
 ```
-cd <path/to/sbs-bootcamp>
+cd <path/to/simplebeerservice>
 serverless
 ```
 ![](readme-images/serverless.png)
@@ -138,7 +138,7 @@ Next, let's initialize our project. For the rest of the bootcamp, we can use the
 sls project init
 ```
 
-> **Note:** Replace *<path/to/sbs-bootcamp>* with your actual root directory of the bootcamp files.
+> **Note:** Replace *<path/to/simplebeerservice>* with your actual root directory of the bootcamp files.
 
 The Serverless framework will now bring you through a wizard to setup your environment. For stage, type in your name.
 ![Serverless](readme-images/serverless-init.png)
@@ -168,7 +168,7 @@ So, we have our environment all setup, let's create the resources we need within
 ![](readme-images/iot-create-certificate.png)
 5. Click on each link to download the **certificate**, **private key**, and **public key**.
 > **Important!!**
-> Save these certificates to the **sbs-bootcamp/device/certs** folder in your project directory. You will also need one more file, the VeriSign root certificate. [Download that certificate here](https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem) and save it to the same certs directory.
+> Save these certificates to the **simplebeerservice/device/certs** folder in your project directory. You will also need one more file, the VeriSign root certificate. [Download that certificate here](https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem) and save it to the same certs directory.
 
 6. Click the **Create Policy** box. Allow access to all of IoT for this demo, but selecting **iot:\*** and **\***.
 ![](readme-images/iot-create-policy.png)
@@ -199,7 +199,7 @@ For the subscribing web application, we will be creating a Cognito Identity Pool
 6. Next, it will bring us to a screen where we can setup the IAM roles that will be assumed by both an *Unauthenticated User* and an *Authenticated User*. Look at the policy documents to see how they are structured. Then press **Allow**.
 7. The final step is to give permission to an *Unauthenticated User* to subscribe to our AWS IoT Topic. To do this, click back to the list of AWS Services and open the **AWS Identity & Access Management Console**.
 8. On the left menu, click **Roles**.
-9. You will see all of your roles here. There is one role titled **Cognito_<YOUR_APP_NAME>AuthRole**. Click on this role.
+9. You will see all of your roles here. There is one role titled **Cognito_<YOUR_APP_NAME>UnauthRole**. Click on this role.
 10. Under *Inline Policies*, press **Create Role Policy** to create a new inline IAM policy.
 ![](readme-images/iam-permissions.png)
 11. Select the box **Custom Policy** and press **Select**.
@@ -258,7 +258,7 @@ Update these fields to point to the files that you downloaded above and the regi
 Now, let's run it and test it out!
 
 ```
-cd <path/to/sbs-bootcamp/device>
+cd <path/to/simplebeerservice/device>
 node sbs-simulator.js
 ```
 
@@ -283,7 +283,7 @@ You now should see messages flowing in here!
 For this section, we will be working out of the **client** directory. This is where all of the files we need to build out the static web application. First, run this command to change the directory:
 
 ```
-cd <path/to/sbs-bootcamp/client>
+cd <path/to/simplebeerservice/client>
 ```
 
 Before we get going, here is a quick intro to a tool called **Gulp**. Gulp is a task manager for Node.js applications. It enables us to wire up commands that will perform common tasks. Here are a few we will use today. Go ahead and try them out!
