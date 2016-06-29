@@ -88,7 +88,7 @@
     "WWWBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
-        "BucketName": "${stage}.sbsbootcamp",
+        "BucketName": "${stage}.${region}.sbsbootcamp",
         "AccessControl" : "PublicRead",
         "WebsiteConfiguration" : {
           "IndexDocument" : "index.html",
