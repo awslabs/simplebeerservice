@@ -155,7 +155,6 @@ This will now launch a CloudFormation template that will include all of the reso
 
 >Check it out! Open up s-resources-cf.json. In here is the cloudformation template that Serverless runs when you init a new project, create a new stage or update the resources associated with your project. In this project we have:
 - S3 bucket for web files.
-- CloudFront distribution associated with your S3 bucket as the origin.
 - Logging bucket for use later.
 
 **Congrats! You have successfully setup your Serverless enviroment.**
