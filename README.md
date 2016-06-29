@@ -34,7 +34,7 @@ npm install -g serverless yo bower gulp
 
 ### Setting up AWS CLI tools
 
-For this lab, you will need to have the AWS CLI tools installed.
+For this bootcamp, you will need to have the AWS CLI tools installed.
 
 #### Windows:
 
@@ -85,9 +85,16 @@ First, you will need to clone this project directory. It will have everything yo
 
 ```
 cd <path/to/my/project/directory>
-git clone https://github.com/jerwallace/sbs-bootcamp-nyc.git
+git clone https://github.com/awslabs/simplebeerservice.git
 ```
+
 > **Note:** Replace *<path/to/my/project/directory>* with your actual directory you want to run this in.
+
+This will clone the **simplebeerservice** code. Now, switch to the bootcamp branch. This will have all of the files you need for this bootcamp:
+
+```
+git checkout bootcamp
+```
 
 Next, run the following commands in your new directory.
 
