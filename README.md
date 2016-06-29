@@ -172,8 +172,10 @@ So, we have our environment all setup, let's create the resources we need within
 4. Click the **Create Certificates** box. Check the box *Activate* and then press the **1-click certificates** button.
 ![](readme-images/iot-create-certificate.png)
 5. Click on each link to download the **certificate**, **private key**, and **public key**.
-> **Important!!**
-> Save these certificates to the **simplebeerservice/device/certs** folder in your project directory. You will also need one more file, the VeriSign root certificate. [Download that certificate here](https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem) and save it to the same certs directory.
+> **Important!!**  
+> From the command line in your project directory:  `mkdir ./device/certs`  
+Now save these certificates to the **simplebeerservice/device/certs** folder in your project directory.  
+You will also need one more file, the VeriSign root certificate. [Download that certificate here](https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem) and save it to the same certs directory.
 
 6. Click the **Create Policy** box. Allow access to all of IoT for this demo, but selecting **iot:\*** and **\***.
 ![](readme-images/iot-create-policy.png)
