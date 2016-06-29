@@ -47,9 +47,14 @@ Download and install the CLI here:
 Ensure that Python is installed. Once python is installed, run this command:
 
 ```
-pip install awscli
+sudo pip install awscli
 ```
 
+If on OSX El Capitan, run this command:
+
+```
+sudo pip install awscli --ignore-installed six
+```
 > **Note:** You will need to have pip installed in order to run this command. To install pip, follow the instructions [here](https://pip.pypa.io/en/stable/installing/).
 
 #### Configure the CLI:
