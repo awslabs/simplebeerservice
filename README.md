@@ -350,8 +350,6 @@ Create a new lambda function and associate it with your IoT topic. To do this wi
 sls function create
 ```
 
-However, there is already one "hello iot" lambda function created for you as part of this package.
-
-[Documentation Link](https://github.com/serverless/serverless/pull/1061)
+However, there is already one "hello iot" lambda function created for you as part of this package. Feel free to use that function as a boiler plate. For more information on how to set this up, [see the Serverless Documentation](https://github.com/serverless/serverless/pull/1061)
 
 Thanks for participating and good luck!
