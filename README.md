@@ -209,7 +209,8 @@ For the subscribing web application, we will be creating a Cognito Identity Pool
 ![](readme-images/iam-permissions.png)
 11. Select the box **Custom Policy** and press **Select**.
 ![](readme-images/iam-create-new-policy.png)
-12. Name the policy and copy and paste the following JSON text. **Remember to replace <REPLACE_WITH_ACCOUNT_NUMBER> with your actual account number**.
+12. Name the policy and copy and paste the following JSON text. **Remember to replace <REPLACE_WITH_ACCOUNT_NUMBER> with your actual account number**.  
+(Account Number can be found from AWS website menu bar --> [Your UserName] --> My Account --> Account Settings --> Account Id )
 
 ```json
 {
