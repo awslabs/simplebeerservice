@@ -65,7 +65,7 @@ Choose **AWS Management Console**.
 Find the section: **Security & Identity**,  
 Choose **Identity & Access Management** (aka IAM)  
 
-Now create a new IAM user as follows: 
+Now create a new IAM user as follows:
 
 1. Create a new user by clicking **Create User** in the *IAM Console*.
 <img src="readme-images/iam-create-user.png" width="400">
@@ -234,14 +234,14 @@ For the subscribing web application, we will be creating a Cognito Identity Pool
             "Effect": "Allow",
             "Action": "iot:Subscribe",
             "Resource": [
-                "arn:aws:iot:us-east-1:147755086966:topicfilter/sbs/*"
+                "arn:aws:iot:<REGION>:<REPLACE_WITH_ACCOUNT_NUMBER>:topicfilter/sbs/*"
             ]
         }
     ]
 }
 ```
 
-> **Note:** Replace *<REPLACE_WITH_ACCOUNT_NUMBER>* with your actual account number.
+> **Note:** Replace *<REPLACE_WITH_ACCOUNT_NUMBER>* with your actual account number and *<REGION>* with the region you are using.
 
 13. Press **Apply Policy** and you are done!
 
