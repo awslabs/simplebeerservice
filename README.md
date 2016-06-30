@@ -59,7 +59,13 @@ sudo pip install awscli --ignore-installed six
 
 #### Configure the CLI:
 
-First, sign in to the AWS console and create a new IAM user.
+First, sign in to the AWS.
+Under **My Account** drop down menu,  
+Choose **AWS Management Console**.  
+Find the section: **Security & Identity**,  
+Choose **Identity & Access Management** (aka IAM)  
+
+Now create a new IAM user as follows: 
 
 1. Create a new user by clicking **Create User** in the *IAM Console*.
 <img src="readme-images/iam-create-user.png" width="400">
