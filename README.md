@@ -35,11 +35,17 @@ Once you get the prints back, you will need a few screws to tie everything toget
 1. Download the Intel Edison installer and the latest Yocto image. [Intel Downloads](https://software.intel.com/en-us/iot/hardware/edison/downloads).
 2. Run the installer. There are three steps here. Flash the image, set up root user credentials and setup WiFi. **Save the IP Address and the SSH credentials to be used later**.
 3. Ensure that you are on the same network as your device and SSH into the device. You can SSH into the device using *Terminal on a Mac / Linux or Putty on a Windows*.
-  `ssh root@<IP_ADDRESS>`
+  ```
+  ssh root@<IP_ADDRESS>
+  ```
 4. Install Forever (to keep your SBS application running).
-  `npm install -g forever`
+  ```
+  npm install -g forever
+  ```
 5. Create a new directory for your code.
-  `mkdir /opt/sbs/`
+  ```
+  mkdir /opt/sbs/
+  ```
 
 **Before moving forward, finish the software / AWS environment setup and come back. This will enable you to create your certificates and customize the application before copying the files and setting up auto-start.**
 
