@@ -1,0 +1,23 @@
+{
+  "name": "sbs",
+  "version": "1.0.0",
+  "description": "Simple Beer Service v5.0",
+  "scripts": {
+    "simulate": "node sbs-simulator.js",
+    "start": "node sbs.js"
+  },
+  "author": "Jeremy Wallace <jeremygw@amazon.com> (https://github.com/awslabs)",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^2.0.0-rc.6",
+    "aws-iot-device-sdk": "^1.0.12",
+    "command-line-args": "^3.0.0",
+    "crypto-js": "^3.1.6",
+    "edison-io": "^0.9.4",
+    "forever": "^0.15.2",
+    "johnny-five": "^0.9.56",
+    "restler": "^3.4.0",
+    "sleep": "^3.0.1",
+    "th02js": "0.0.2"
+  }
+}

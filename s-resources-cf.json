@@ -1,0 +1,352 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Creates the backend resources for Simple Beer Service.",
+  "Mappings": {
+    "RegionMap": {
+      "us-east-1": {
+        "S3hostedzoneID": "Z3AQBSTGFYJSTF",
+        "websiteendpoint": "s3-website-us-east-1.amazonaws.com"
+      },
+      "us-west-1": {
+        "S3hostedzoneID": "Z2F56UZL2M1ACD",
+        "websiteendpoint": "s3-website-us-west-1.amazonaws.com"
+      },
+      "us-west-2": {
+        "S3hostedzoneID": "Z3BJ6K6RIION7M",
+        "websiteendpoint": "s3-website-us-west-2.amazonaws.com"
+      },
+      "eu-west-1": {
+        "S3hostedzoneID": "Z1BKCTXD74EZPE",
+        "websiteendpoint": "s3-website-eu-west-1.amazonaws.com"
+      },
+      "ap-southeast-1": {
+        "S3hostedzoneID": "Z3O0J2DXBE1FTB",
+        "websiteendpoint": "s3-website-ap-southeast-1.amazonaws.com"
+      },
+      "ap-southeast-2": {
+        "S3hostedzoneID": "Z1WCIGYICN2BYD",
+        "websiteendpoint": "s3-website-ap-southeast-2.amazonaws.com"
+      },
+      "ap-northeast-1": {
+        "S3hostedzoneID": "Z2M4EHUR26P7ZW",
+        "websiteendpoint": "s3-website-ap-northeast-1.amazonaws.com"
+      },
+      "sa-east-1": {
+        "S3hostedzoneID": "Z31GFT0UA1I2HV",
+        "websiteendpoint": "s3-website-sa-east-1.amazonaws.com"
+      }
+    }
+  },
+  "Resources": {
+    "IamIoTRoleLambda": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "IamIoTPolicyLambda": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "${stage}-${project}-lambda-iot",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "arn:aws:logs:${region}:*:*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": "iot:Publish",
+              "Resource": [
+                  "arn:aws:iot:us-east-1:147755086966:topicfilter/sbs/*"
+              ]
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "IamIoTRoleLambda"
+          }
+        ]
+      }
+    },
+    "IamRoleLambda": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "IamPolicyLambda": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "${stage}-${project}-lambda",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "arn:aws:logs:${region}:*:*"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "IamRoleLambda"
+          }
+        ]
+      }
+    },
+    "IamRoleElasticSearch": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "IamPolicyElasticSearch": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "${stage}-${project}-lambda-es",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "arn:aws:logs:${region}:*:*"
+            },
+            {
+              "Action": [
+                  "es:*"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "IamRoleElasticSearch"
+          }
+        ]
+      }
+    },
+    "WWWBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "${stage}.${domain}",
+        "AccessControl" : "PublicRead",
+            "WebsiteConfiguration" : {
+                "IndexDocument" : "index.html",
+                "ErrorDocument" : "error.html"
+          }
+        }
+      },
+    "WWWBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "WWWBucket"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "WWWBucket"
+                    },
+                    "/*"
+                  ]
+                ]
+              },
+              "Principal": "*"
+            }
+          ]
+        }
+      }
+    },
+    "webDistribution" : {
+        "Type" : "AWS::CloudFront::Distribution",
+        "Properties" : {
+            "DistributionConfig" : {
+                "Origins" : [ {
+                    "DomainName": "${stage}.${domain}.s3.amazonaws.com",
+                    "Id" : "S3Origin",
+                    "S3OriginConfig": {}
+                }],
+                "Enabled" : "true",
+                "Comment" : "Creates the CloudFront Distribution for the developer.",
+                "DefaultRootObject" : "index.html",
+                "Logging" : {
+                    "IncludeCookies" : "false",
+                    "Bucket" : "logs.${stage}.${region}.${domain}.s3.amazonaws.com",
+                    "Prefix" : "cloudfront"
+                },
+                "Aliases" : [ "${stage}.${domain}", "www.${stage}.${domain}" ],
+                "DefaultCacheBehavior" : {
+                    "AllowedMethods" : [ "DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT" ],
+                    "TargetOriginId" : "S3Origin",
+                    "ForwardedValues" : {
+                        "QueryString" : "false",
+                        "Cookies" : { "Forward" : "none" }
+                    },
+                    "ViewerProtocolPolicy" : "allow-all"
+                },
+               "PriceClass" : "PriceClass_200"
+            }
+        }
+    },
+    "DNS" : {
+    "Type" : "AWS::Route53::RecordSetGroup",
+    "Properties" : {
+        "HostedZoneId" : "${hostedZoneId}",
+        "RecordSets" : [{
+            "Name" : "${stage}.${domain}",
+            "Type" : "A",
+            "AliasTarget" : {
+                "HostedZoneId" : "Z2FDTNDATAQYW2",
+                "DNSName" : { "Fn::GetAtt" : [ "webDistribution" , "DomainName" ] }
+            }
+        }]
+    }
+    },
+    "LogsBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "logs.${stage}.${region}.${domain}"
+      }
+    },
+    "ElasticsearchDomain": {
+      "Type": "AWS::Elasticsearch::Domain",
+      "Properties": {
+        "ElasticsearchClusterConfig": {
+          "DedicatedMasterEnabled": "true",
+          "InstanceCount": "2",
+          "ZoneAwarenessEnabled": "true",
+          "InstanceType": "m3.medium.elasticsearch",
+          "DedicatedMasterType": "m3.medium.elasticsearch",
+          "DedicatedMasterCount": "3"
+        },
+        "EBSOptions": {
+          "EBSEnabled": true,
+          "Iops": 0,
+          "VolumeSize": 20,
+          "VolumeType": "gp2"
+        },
+        "SnapshotOptions": {
+          "AutomatedSnapshotStartHour": "0"
+        },
+        "AccessPolicies": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": "*"
+            },
+            "Action": "es:*",
+            "Resource": "*"
+          }]
+        },
+        "AdvancedOptions": {
+          "rest.action.multi.allow_explicit_index": "true"
+        }
+      }
+    }
+},
+"Outputs": {
+  "WebsiteURL": {
+    "Value": {
+      "Fn::GetAtt": [
+        "WWWBucket",
+        "WebsiteURL"
+      ]
+    },
+    "Description": "URL for website hosted on S3"
+  },
+  "LogsBucket": {
+    "Value": {
+      "Ref": "LogsBucket"
+    }
+  },
+  "ElasticSearchDomainEndpoint": {
+    "Value": {
+      "Fn::GetAtt" : [ "ElasticsearchDomain", "DomainEndpoint" ]
+    }
+  },
+  "IamElasticSearchRoleARN": {
+    "Value": {
+      "Fn::GetAtt" : [ "IamRoleElasticSearch", "Arn" ]
+    }
+  }
+}
+}
