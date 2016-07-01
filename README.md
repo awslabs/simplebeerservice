@@ -35,14 +35,19 @@ Once you get the prints back, you will need a few screws to tie everything toget
 1. Download the Intel Edison installer and the latest Yocto image. [Intel Downloads](https://software.intel.com/en-us/iot/hardware/edison/downloads).
 2. Run the installer. There are three steps here. Flash the image, set up root user credentials and setup WiFi. **Save the IP Address and the SSH credentials to be used later**.
 3. Ensure that you are on the same network as your device and SSH into the device. You can SSH into the device using *Terminal on a Mac / Linux or Putty on a Windows*.
+
   ```
   ssh root@<IP_ADDRESS>
   ```
+
 4. Install Forever (to keep your SBS application running).
+
   ```
   npm install -g forever
   ```
+
 5. Create a new directory for your code.
+
   ```
   mkdir /opt/sbs/
   ```
@@ -51,33 +56,40 @@ Once you get the prints back, you will need a few screws to tie everything toget
 
 5. Open the file **device/device.json**. Modify the file to fit your environment. In particular, make sure that the *components* json object points to the locations where all of your sensors are plugged in.
 6. From another terminal / command line window, copy the files in the device folder over to your device.
-```
-cd device
-scp -r ./ root@<IP_ADDRESS>:/opt/sbs/
-```
+
+  ```
+  cd device
+  scp -r ./ root@<IP_ADDRESS>:/opt/sbs/
+  ```
+
 7. Go back to the SSH session. Install the required libraries. This may take a few minutes.
-```
-cd /opt/sbs/
-npm install
-```
+
+  ```
+  cd /opt/sbs/
+  npm install
+  ```
+
 8. Create an autostart script.
-```
-nano /etc/init.d/startsbs.sh
 
-<OPEN NANO EDITOR>
+  ```
+  nano /etc/init.d/startsbs.sh
 
-#!/bin/bash
-forever start -a -l /dev/null /opt/sbs/sbs.js
+  <OPEN NANO EDITOR>
 
-<CONTROL O | write the changes>
-<CONTROL X | exit>
-```
+  #!/bin/bash
+  forever start -a -l /dev/null /opt/sbs/sbs.js
+
+  <CONTROL O | write the changes>
+  <CONTROL X | exit>
+  ```
+
 9. Add the start script to the boot routine:
-```
-chmod +x /etc/init.d/startsbs.sh
-update-rc.d startsbs.sh defaults
-ln –s /etc/init.d/startsbs.sh /etc/rc3.d/S99startsbs.sh
-```
+
+  ```
+  chmod +x /etc/init.d/startsbs.sh
+  update-rc.d startsbs.sh defaults
+  ln –s /etc/init.d/startsbs.sh /etc/rc3.d/S99startsbs.sh
+  ```
 
 ## Software
 
@@ -95,53 +107,64 @@ npm install -g serverless yo bower gulp
 ### AWS Environment
 
 1. Create the AWS IoT thing.
-```
-aws iot create-thing --thing-name <YOUR_UNIT_ID>
-```
+
+  ```
+  aws iot create-thing --thing-name <YOUR_UNIT_ID>
+  ```
+
 2. Create a new file titled *iotpolicy.json*.
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "iot:Connect"
-            ],
-            "Resource": [
-                "*"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "iot:Publish"
-            ],
-            "Resource": [
-                "arn:aws:iot:<REGION>:<ACCOUNT_NUMBER>:topic/<TOPIC_NAME>"
-            ]
-        }
-    ]
-}
-```
+
+  ```json
+  {
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Effect": "Allow",
+              "Action": [
+                  "iot:Connect"
+              ],
+              "Resource": [
+                  "*"
+              ]
+          },
+          {
+              "Effect": "Allow",
+              "Action": [
+                  "iot:Publish"
+              ],
+              "Resource": [
+                  "arn:aws:iot:<REGION>:<ACCOUNT_NUMBER>:topic/<TOPIC_NAME>"
+              ]
+          }
+      ]
+  }
+  ```
+
 3. Create the AWS IoT policy.
-```
-aws iot create-policy --policy-name <POLICY_NAME> --policy-document file://iotpolicy.json
-```
+
+  ```
+  aws iot create-policy --policy-name <POLICY_NAME> --policy-document file://iotpolicy.json
+  ```
+
 4. Create the certificates and store them in the **device/cert** directory.
-```
-mkdir device/cert
-aws iot create-keys-and-certificate --set-as-active --certificate-pem-outfile device/cert/certificate.pem.crt --public-key-outfile device/cert/public.pem.key --private-key-outfile device/cert/private.pem.key
-```
+
+  ```
+  mkdir device/cert
+  aws iot create-keys-and-certificate --set-as-active --certificate-pem-outfile device/cert/certificate.pem.crt --public-key-outfile device/cert/public.pem.key --private-key-outfile device/cert/private.pem.key
+  ```
+
 5. Copy the Certificate ARN produced in the previous command. Associate the policy and thing with the certificate:
-```
-aws iot attach-principal-policy --policy-name <POLICY_NAME> --principal arn:aws:iot:<REGION>:<ACCOUNT>:cert/<CERTID>
-aws iot attach-thing-principal --thing-name <THING_NAME> --principal arn:aws:iot:<REGION>:<ACCOUNT>:cert/<CERTID>
-```
+
+  ```
+  aws iot attach-principal-policy --policy-name <POLICY_NAME> --principal arn:aws:iot:<REGION>:<ACCOUNT>:cert/<CERTID>
+  aws iot attach-thing-principal --thing-name <THING_NAME> --principal arn:aws:iot:<REGION>:<ACCOUNT>:cert/<CERTID>
+  ```
+
 6. Create a new Cognito Identity Pool and copy the Identity Pool ID to a safe place for later (in the ).
-```
-aws cognito create-identity-pool --identity-pool-name <YOUR_IDENTITY_POOL_NAME> --allow-unauthenticated-identities
-```
+
+  ```
+  aws cognito create-identity-pool --identity-pool-name <YOUR_IDENTITY_POOL_NAME> --allow-unauthenticated-identities
+  ```
 
 ### Serverless Project
 
@@ -195,11 +218,15 @@ Awesome. Now you know how to work with Gulp! Next, let's open up **app/scripts/m
 
 1. Find the variable **IDENTITY_POOL_ID** and update the variable with your identity pool.
 2. Go back to the command line and type:
-```
-gulp build
-```
+
+  ```
+  gulp build
+  ```
+
 3. Change the directory back to the main serverless directory and type:
-```
-sls client deploy
-```
+
+  ```
+  sls client deploy
+  ```
+
 4. Serverless will output an S3 link. Put that S3 link in your browser and check out your static site!!
