@@ -1,155 +1,262 @@
-Simple Beer Service Setup Guide
-=======================================================
+# Simple Beer Service v5.0
 
-Simple Beer Service (SBS) is a cloud-connected kegerator that sends sensor data (beer flow, temperature, humidity, sound levels and proximity) to an Amazon API Gateway endpoint. The API Gateway endpoint invokes an AWS Lambda function that writes sensor data to an Amazon DynamoDB table. A serverless static S3 website displays the data in real-time as it streams in through Amazon API Gateway and AWS Lambda.
+Simple Beer Service is a cloud-connected kegerator that sends sensor data (beer flow, temperature, humidity, sound levels and proximity) to AWS. Simple Beer Service kegerators publish sensor data collected by an IoT device to an Amazon IoT Device Gateway. The Amazon IoT Rule Engine is used to invoke downstream actions in AWS, such as publishing to an Amazon Kinesis Firehose or an Amazon DynamoDB table.
 
-SBS Device Architecture
------------------
-![](rasppi-device-architecture.png?raw=true)
+The data visualizations are delivered through a static web application dashboard that opens a web socket connection to the same Amazon IoT Topic, providing a near real-time display of the sensor data. The web application is stored in Amazon S3 and delivered through Amazon’s content delivery network, Amazon CloudFront.
 
-Real-time Dashboard Architecture
------------------
-![](web-architecture.png?raw=true)
+![Simple Beer Service Architecture](readme-images/architecturev5.png)
 
-Pre-requisites
-==================
+For a more step-by-step instruction guide through the AWS console, see the [bootcamp branch](http://github.com/awslabs/simplebeerservice/tree/bootcamp) of this repository.
 
-Hardware
------------------
-Before getting started, check to ensure you have the following components:
+## Hardware
 
-* Raspberry Pi -  [Purchase](http://www.amazon.com/Raspberry-Pi-Model-Project-Board/dp/B00T2U7R7I/ref=sr_1_2?s=pc&ie=UTF8&qid=1443486305&sr=1-2&keywords=Raspberry+Pi)
-* GrovePi Shield - [Purchase](http://www.amazon.com/Seeedstudio-GrovePi/dp/B012TNLD10/ref=sr_1_2?s=pc&ie=UTF8&qid=1443486442&sr=1-2&keywords=GrovePi)
-* Seeed Studio: Flow Meter, DHT PRO, Ultrasonic Sensor, Button, 3 LEDS, Speakers and whatever else you want!
-[More Info](http://www.seeedstudio.com/wiki/Grove_System)
+You can select the components that you feel would be best for your unit. However, the three major components you will need are:
 
-Getting your AWS environment up and running.
-==================
+- [Kegerator](https://www.amazon.com/s?rh=n%3A2686378011%2Cp_4%3AKegco)
+- 3D Printed Head Unit. *See Below*
+- [Intel Edison and AWS IoT Starter Kit](https://www.amazon.com/dp/B0168KU5FK?psc=1) or any supported [Johnny-five platform](http://johnny-five.io/platform-support/)
 
-1. Purchase a domain for your SBS website and create a new hosted zone associated with the domain.
-2. Launch the CloudFormation script include in the **cfn/** directory. Reference the hosted zone used in Step 1.
-3. Once completed, in the outputs of your CloudFormation stack, you will see the name of two DynamoDB tables. One, is the unit table used to hold the information about all SBS units in your fleet. The other, is the SBS data table. All sensor data from your SBS fleet is written into this table. Secondly, you will see the name of the three lambda functions in here as well. We will reference these names in the application files.
-4. In the SBS code base, you will need to change a few things:
-  - *deploy/lambda.sh* -> replace the FCT_NAMES with the actual Lambda function names from the outputs above.
-  - *web/Gruntfile.js* -> find the task "publish" and replace with <S3_BUCKET> with your bucket name. Also, change the IAM profile from default to your profile name if required, as well as the default region.
-  - *lambda/getSBSFleet, lambda/readSBSData, lambda/writeSBSData* -> Add in your DynamoDB table names to these files.
-5. Deploy your lambda functions using the script **/deploy/lambda.sh**.
-6. Next, create a new API Gateway endpoint and wire up the Lambda functions. [Coming Soon, Swagger File]
-  - *ENDPOINT/data* -> GET -> Query String Parameters (timestamp) -> readSBSData lambda function.
-  - *ENDPOINT/fleet* -> GET -> getSBSFleet lambda function.
-  - *ENDPOINT/{sbsid}* -> GET -> getSBSFleet lambda function.
-  - *ENDPOINT/{sbsid}/data* -> GET -> Query String Parameters (timestamp) -> readSBSData lambda function.
-  - *ENDPOINT/{sbsid}/data* -> POST -> writeSBSData lambda function.
-  - For the resources that require the query string parameter timestamp, include the following Mapping Template in the integration response:application/json -> **{ "timestamp": "$input.params('timestamp')" }**
-  - For more information on how to setup API Gateway and wire them up to Amazon API Gateway, [click here](https://aws.amazon.com/blogs/compute/the-squirrelbin-architecture-a-serverless-microservice-using-aws-lambda/)
-  - You will also need to enable CORS support for API Gateway, to do this [click here](http://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors.html)
-7. Once completed, take your deployed API Gateway endpoint and add it the following file. You will also need to reference this when installign the device code.
-  - *web/app/scripts/main.js*
+[Click here for the full bill of materials.](sbs-build-of-materials.csv)
 
-Software
-==================
+### The Head Unit
 
-Flashing the Raspberry Pi with Raspbian
-------------------
+The 3D printable .STL files are available in the stl folder of this repository. You can print these at your favourite 3D printing studio. [3Dhubs.com](http://3dhubs.com/) is a great place to submit your order and find a local printer.
 
-1. Follow the instructions on the Raspberry Pi website to flash a new SD card with **Raspbian** [1].
-2. Once complete, put the SD card into the Raspberry Pi, connect the ethernet cable, external monitor and keyboard.
-3. Start the Rasberry Pi. After following the instructions above, you should see a command prompt.
+There is also a slot in the front of the head unit for a clear face plate. [Ponoko.com](http://www.ponoko.com/) is a great place to get a face plate designed and laser etched. Here is the material that we recommend:
+- Size: **195mm x 80mm**
+- Acrylic Clear - Abrasion Resistant 0.118 inches - 15.118 inches x 15.118 inches. [Link](http://www.ponoko.com/make-and-sell/show-material/583-acrylic-clear-abrasion-resistant)
 
-Installing the software
-------------------
+Once you get the prints back, you will need a few screws to tie everything together.
 
-1. Update the OS:
+### The Device
 
-		sudo apt-get install rpi-update
-		sudo rpi-update
-		sudo apt-get upgrade
-		sudo reboot
+> **Note:** This instruction guide will focus on the Intel Edison, however, Johnny-Five supports many platforms. If you are using another platform, simply change the `io: new Edison()` option when instantiating a board object in the *sbs.js* device code.
 
-2. Configure the linux distribution:
+1. Download the Intel Edison installer and the latest Yocto image. [Intel Downloads](https://software.intel.com/en-us/iot/hardware/edison/downloads).
+2. Run the installer. There are three steps here. Flash the image, set up root user credentials and setup WiFi. **Save the IP Address and the SSH credentials to be used later**.
+3. Ensure that you are on the same network as your device and SSH into the device. You can SSH into the device using *Terminal on a Mac / Linux or Putty on a Windows*.
 
-		sudo dpkg-reconfigure keyboard-configuration
-		sudo dpkg-reconfigure tzdata
-		sudo apt-get update
-		sudo reboot
+  ```
+  ssh root@<IP_ADDRESS>
+  ```
 
-3. Copy over SBS files to the Raspberry-Pi. A recommended directory to install SBS is:
+4. Install Forever (to keep your SBS application running).
 
-        sudo su
-        cd /opt/
-        mkdir sbs
+  ```
+  npm install -g forever
+  ```
 
-4. Run the install script from the SBS directory:
+5. Create a new directory for your code.
 
-        sudo ./install.sh
+  ```
+  mkdir /opt/sbs/
+  ```
 
-5. During the install process, you will be prompted for some configuration variables. You will need to input:
-	- A Gateway ID: The identifier of your new SBS unit.
-	- An AWS API Gateway Endpoint.
-	- An AWS API Gateway Key.
-	- The content type (default is application/json)
-	- The location of the sensors. For example, flow-sensor = 5 would mean that the flow sensor is connected to D5 on the GrovePi sheild. You can connect your sound sensor to A0 and your RGB LCD screen to any I2C port.
-  - The location of the LEDS.
-	- The location of the button.
-	- Threshold values. You can leave these as the default values.
+**Before moving forward, finish the software / AWS environment setup and come back. This will enable you to create your certificates and customize the application before copying the files and setting up auto-start.**
 
-6. Once your Raspberry Pi has restarted, go back to your install directory and install grove through pip:
+5. Open the file **device/device.json**. Modify the file to fit your environment. In particular, make sure that the *components* json object points to the locations where all of your sensors are plugged in.
+6. From another terminal / command line window, copy the files in the device folder over to your device.
 
-        cd /opt/sbs/
-        sudo pip install grovepi
+  ```
+  cd device
+  scp -r ./ root@<IP_ADDRESS>:/opt/sbs/
+  ```
 
-7. Set-up WiFi
+7. Go back to the SSH session. Install the required libraries. This may take a few minutes.
 
-	a. Open the WPA Supplicant File:
+  ```
+  cd /opt/sbs/
+  npm install
+  ```
 
-		sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
+8. Create an autostart script.
 
-	b. Add the following to the supplicant file (using the connection details of your WiFi network):
+  ```
+  nano /etc/init.d/startsbs.sh
 
-		network={
-		ssid="YOURSSID"
-		psk="YOURPASSWORD"
+  <OPEN NANO EDITOR>
 
-		# Protocol type can be: RSN (for WP2) and WPA (for WPA1)
-		proto=WPA
+  #!/bin/bash
+  forever start -a -l /dev/null /opt/sbs/sbs.js
 
-		# Key management type can be: WPA-PSK or WPA-EAP (Pre-Shared or Enterprise)
-		key_mgmt=WPA-PSK
+  <CONTROL O | write the changes>
+  <CONTROL X | exit>
+  ```
 
-		# Pairwise can be CCMP or TKIP (for WPA2 or WPA1)
-		pairwise=TKIP
+9. Add the start script to the boot routine:
 
-		#Authorization option should be OPEN for both WPA1/WPA2 (in less commonly used are SHARED and LEAP)
-		auth_alg=OPEN
-		}
+  ```
+  chmod +x /etc/init.d/startsbs.sh
+  update-rc.d startsbs.sh defaults
+  ln –s /etc/init.d/startsbs.sh /etc/rc3.d/S99startsbs.sh
+  ```
 
-	c. Open the network interfaces file:
+## Software
 
-		sudo nano /etc/network/interfaces
+- Install the [AWS CLI](https://aws.amazon.com/cli/).
+- Install [version 5.X of Node.JS](https://nodejs.org/dist/latest-v5.x/).
 
-	d. Add the following (or replace if it is already there):
+Install the [Serverless Framework](http://serverless.com), [Yeoman](http://yeoman.io), [Bower](http://bower.io) and [Gulp](http://gulpjs.com). You can do this all with a single command:
 
-		allow-hotplug wlan0
-		iface wlan0 inet dhcp
-		wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
-		iface default inet dhcp
+```
+npm install -g serverless yo bower gulp
+```
 
-7. Run python SBS.py to start the application.
+> **Note:** You may need to run "sudo" to install these as an administrator.
 
-Kegerator Setup
-==================
+### AWS Environment
 
-Included in this respository is the 3D printable .stl files. Bring these files to your favourite 3D printer (or print them yourself!) and build the SBS compute unit.
+1. Create the AWS IoT thing.
 
-1. Once the compute unit has been created, attach it to the top of your kegerator tower. Drop the wires for the flow sensor and the digital humidity and temperature sensor down the tower into the fridge.
-2. Ensure you have two couplers for your flow meter, and they are the right size for the line in your kegerator. If all is good, cut the line from the keg coupler to the tower, attaching each end of the tube to the two small couplers on each end of the flow meter.
-3. Plug in the fridge, and the SBS unit and let it cool down for an hour or so.
-4. Buy a keg and have it shipped to your address. Once it arrives, ensure it is the right kind of beer that you were expecting. Tap the keg by attaching the keg coupler to the keg and put it in the refrigerator.
-5. The flow meter will add resistance to your line, which might mean you have to increase the pressure in the system. However, finding the right pressure is an art. Take a look at Draft Beer Made Easy [2] for more detailed instructions if you are finding your beer is a) pouring really slowly - pressure is too low, or b) you have really foamy beer - pressure is too high.
+  ```
+  aws iot create-thing --thing-name <YOUR_UNIT_ID>
+  ```
 
-References
-==================
+2. Create a new file titled *iotpolicy.json*.
 
-[1] [Raspberry Pi Flashing Guide](http://www.raspberrypi.org/documentation/installation/installing-images/README.md)
+  ```json
+  {
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Effect": "Allow",
+              "Action": [
+                  "iot:Connect"
+              ],
+              "Resource": [
+                  "*"
+              ]
+          },
+          {
+              "Effect": "Allow",
+              "Action": [
+                  "iot:Publish"
+              ],
+              "Resource": [
+                  "arn:aws:iot:<REGION>:<ACCOUNT_NUMBER>:topic/<TOPIC_NAME>"
+              ]
+          }
+      ]
+  }
+  ```
 
-[2] [Draft Beer Made Easy](http://www.draft-beer-made-easy.com/kegeratorgaspressure.html)
+3. Create the AWS IoT policy.
+
+  ```
+  aws iot create-policy --policy-name <POLICY_NAME> --policy-document file://iotpolicy.json
+  ```
+
+4. Create the certificates and store them in the **device/cert** directory.
+
+  ```
+  mkdir device/cert
+  aws iot create-keys-and-certificate --set-as-active --certificate-pem-outfile device/cert/certificate.pem.crt --public-key-outfile device/cert/public.pem.key --private-key-outfile device/cert/private.pem.key
+  ```
+  > You will also need one more file, the VeriSign root certificate. [Download that certificate here](https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem) and save it to the same cert directory. Name it **root.pem.crt**.
+
+5. Copy the Certificate ARN produced in the previous command. Associate the policy and thing with the certificate:
+
+  ```
+  aws iot attach-principal-policy --policy-name <POLICY_NAME> --principal arn:aws:iot:<REGION>:<ACCOUNT>:cert/<CERTID>
+  aws iot attach-thing-principal --thing-name <THING_NAME> --principal arn:aws:iot:<REGION>:<ACCOUNT>:cert/<CERTID>
+  ```
+
+6. Create a new Cognito Identity Pool and copy the Identity Pool ID to a safe place for later. It is easiest to do this from the AWS console. [Follow the directions here](http://docs.aws.amazon.com/cognito/latest/developerguide/identity-pools.html).
+7. Create a new unauth policy, name it **unauth_policy.json** and associate it with the unauthenticated role.
+
+  ```json
+  {
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Effect": "Allow",
+              "Action": [
+                  "iot:Connect",
+                  "iot:Receive"
+              ],
+              "Resource": "*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": "iot:GetThingShadow",
+            "Resource": [
+              "arn:aws:iot:<REGION>:<REPLACE_WITH_ACCOUNT_NUMBER>:thing/<SBS_THING_NAME>"
+            ]
+          },
+          {
+              "Effect": "Allow",
+              "Action": "iot:Subscribe",
+              "Resource": [
+                  "arn:aws:iot:<REGION>:<REPLACE_WITH_ACCOUNT_NUMBER>:topicfilter/<TOPIC_NAME>/*"
+              ]
+          }
+      ]
+  }
+  ```
+
+8. Create the role and apply the policy.
+
+### Serverless Project
+
+This application uses the Serverless Framework. You can initialize your project with the following command:
+
+> **Important!!** Simple Beer Service app assumes that you have a domain to use with your project. If you do not have a hosted zone setup, create one now.
+```
+aws route53 create-hosted-zone --name <domainname.com>
+```
+
+```
+cd simplebeerservice
+npm install
+sls variables set
+  name: domain
+  value: <YOUR_DOMAIN>
+  type: Common
+sls project init
+```
+
+This will create a new set of resources for your SBS application.
+
+> **Note:** you will need to have the CLI installed with a valid AWS profile to start using Serverless.
+
+### Web Application
+
+For this section, we will be working out of the **client** directory. This is where all of the files we need to build out the static web application. First, run this command to change the directory and install the required libraries.
+
+```
+cd client
+npm install
+bower install
+```
+
+Before we get going, here is a quick intro to a tool called **Gulp**. Gulp is a task manager for Node.js applications. It enables us to wire up commands that will perform common tasks. Here are a few we will use today. Go ahead and try them out!
+
+> ```
+gulp serve
+```
+> This command will run a local webserver that is listening for any changes to your app directory. If there are an file changes, it will reload the local running web application. This is great for development, as you can see changes live as you update the code.
+> ```
+gulp build
+```
+> This command will package up all of the files you need for your static site and write them into your **/dist/** folder. This is the folder that serverless is using when it publishes your S3 static files.
+> ```
+gulp test
+```
+> This command will run the unit tests defined in the **/test/** folder. For this project, we have not defined any unit test.
+
+Awesome. Now you know how to work with Gulp! Next, let's open up **app/scripts/main.js** in Atom and copy and paste your identity pool ID from Cognito. You can get this from the Cognito console.
+
+1. Find the variable **IDENTITY_POOL_ID** and update the variable with your identity pool.
+2. Go back to the command line and type:
+
+  ```
+  gulp build
+  ```
+
+3. Change the directory back to the main serverless directory and type:
+
+  ```
+  sls client deploy
+  ```
+
+4. Serverless will output an S3 link. Put that S3 link in your browser and check out your static site!!
