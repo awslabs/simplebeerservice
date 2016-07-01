@@ -2,9 +2,17 @@
   "deviceId": "SBS003",
   "location": "San Francisco",
   "short": "SFO",
+  "region": "us-east-1",
   "intervals": {
     "rotateMessages": 10000,
     "publish": 1020
+  },
+  "topic": "sbs",
+  "logTopic": "logs",
+  "certs": {
+    "privateKey": "/opt/sbs/cert/private.pem.key",
+    "certificate": "/opt/sbs/cert/certificate.pem.crt",
+    "caCert": "/opt/sbs/cert/root.pem.crt"
   },
   "components": {
       "leds": {

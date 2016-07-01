@@ -30,7 +30,7 @@ var bus = 6;
 const commandLineArgs = require('command-line-args')
 const optionDefinitions = [
   { name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
-  { name: 'region', alias: 'r', type: String, defaultValue: 'us-east-1' },
+  { name: 'region', alias: 'r', type: String, defaultValue: config.region },
   { name: 'unitid', alias: 'u', type: String, defaultValue: config.deviceId }
 ]
 const options = commandLineArgs(optionDefinitions)
@@ -52,9 +52,9 @@ var ROTATE_MESSAGE_INTERVAL = config.intervals.rotateMessages;
 
 var unitID = options.unitid;
 var device = awsIot.device({
-    keyPath: "/opt/sbs/cert/private.pem.key",
-    certPath: "/opt/sbs/cert/certificate.pem.crt",
-    caPath: "/opt/sbs/cert/root.pem.crt",
+    keyPath: config.certs.privateKey,
+    certPath: config.certs.certificate,
+    caPath: config.certs.caCert,
     clientId: unitID,
     region: options.region
 });
@@ -62,8 +62,8 @@ var device = awsIot.device({
 var logs = [];
 var data = [];
 
-var topic = "sbs/"+unitID;
-var logtopic = "logs/"+unitID;
+var topic = config.topic+"/"+unitID;
+var logtopic = config.logTopic+"/"+unitID;
 var colors = {
   "green": [ 0, 255, 0 ],
   "red": [ 255, 0, 0 ],
