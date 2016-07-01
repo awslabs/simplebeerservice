@@ -161,7 +161,7 @@ npm install -g serverless yo bower gulp
   aws iot attach-thing-principal --thing-name <THING_NAME> --principal arn:aws:iot:<REGION>:<ACCOUNT>:cert/<CERTID>
   ```
 
-6. Create a new Cognito Identity Pool and copy the Identity Pool ID to a safe place for later (in the ). It is easiest to do this from the AWS console. [Follow the directions here](http://docs.aws.amazon.com/cognito/latest/developerguide/identity-pools.html).
+6. Create a new Cognito Identity Pool and copy the Identity Pool ID to a safe place for later. It is easiest to do this from the AWS console. [Follow the directions here](http://docs.aws.amazon.com/cognito/latest/developerguide/identity-pools.html).
 7. Create a new unauth policy, name it **unauth_policy.json** and associate it with the unauthenticated role.
 
   ```json
