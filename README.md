@@ -152,6 +152,7 @@ npm install -g serverless yo bower gulp
   mkdir device/cert
   aws iot create-keys-and-certificate --set-as-active --certificate-pem-outfile device/cert/certificate.pem.crt --public-key-outfile device/cert/public.pem.key --private-key-outfile device/cert/private.pem.key
   ```
+  > You will also need one more file, the VeriSign root certificate. [Download that certificate here](https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem) and save it to the same cert directory. Name it **root.pem.crt**.
 
 5. Copy the Certificate ARN produced in the previous command. Associate the policy and thing with the certificate:
 
@@ -160,11 +161,40 @@ npm install -g serverless yo bower gulp
   aws iot attach-thing-principal --thing-name <THING_NAME> --principal arn:aws:iot:<REGION>:<ACCOUNT>:cert/<CERTID>
   ```
 
-6. Create a new Cognito Identity Pool and copy the Identity Pool ID to a safe place for later (in the ).
+6. Create a new Cognito Identity Pool and copy the Identity Pool ID to a safe place for later (in the ). It is easiest to do this from the AWS console. [Follow the directions here](http://docs.aws.amazon.com/cognito/latest/developerguide/identity-pools.html).
+7. Create a new unauth policy, name it **unauth_policy.json** and associate it with the unauthenticated role.
 
+  ```json
+  {
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Effect": "Allow",
+              "Action": [
+                  "iot:Connect",
+                  "iot:Receive"
+              ],
+              "Resource": "*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": "iot:GetThingShadow",
+            "Resource": [
+              "arn:aws:iot:<REGION>:<REPLACE_WITH_ACCOUNT_NUMBER>:thing/<SBS_THING_NAME>"
+            ]
+          },
+          {
+              "Effect": "Allow",
+              "Action": "iot:Subscribe",
+              "Resource": [
+                  "arn:aws:iot:<REGION>:<REPLACE_WITH_ACCOUNT_NUMBER>:topicfilter/<TOPIC_NAME>/*"
+              ]
+          }
+      ]
+  }
   ```
-  aws cognito create-identity-pool --identity-pool-name <YOUR_IDENTITY_POOL_NAME> --allow-unauthenticated-identities
-  ```
+
+8. Create the role and apply the policy.
 
 ### Serverless Project
 
