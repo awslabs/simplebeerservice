@@ -29,6 +29,8 @@ software license above.
 var COGNITO_IDENTITY_POOL = '<YOUR_COGNITO_IDENTITY_POOL_ID>';
 var IOT_REGION = 'us-east-1';
 var IOTENDPOINT = 'data.iot.'+IOT_REGION+'.amazonaws.com';
+var TOPIC = 'sbs';
+
 // ============ REST OF CODE =============== //
 
 // Smoothie Settings
@@ -201,7 +203,7 @@ function initClient(requestUrl) {
     var connectOptions = {
         onSuccess: function () {
             console.log('connected');
-            client.subscribe('sbs/#');
+            client.subscribe(TOPIC+'/#');
         },
         useSSL: true,
         timeout: 16,
