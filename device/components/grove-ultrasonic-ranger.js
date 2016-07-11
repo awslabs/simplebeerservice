@@ -7,4 +7,3 @@ UltrasonicRanger = function(pin) {
 UltrasonicRanger.prototype = Object.create(GroveSensor.prototype, {});
 
 exports = module.exports = UltrasonicRanger;
-}
