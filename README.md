@@ -26,7 +26,7 @@ That's it for the prereqs! Now, let's install all the pre-reqs setup.
 There are two node packages we need to install globally, so that we can use them no matter what project we are working on. To do this, run the following command:
 
 ```
-npm install -g serverless yo bower gulp
+npm install -g serverless@0.5.6 yo bower gulp
 ```
 
 > **What are these?!**
