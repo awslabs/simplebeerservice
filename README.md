@@ -316,15 +316,16 @@ gulp test
 Awesome. Now you know how to work with Gulp! Next, let's open up **app/scripts/main.js** in Atom and copy and paste your identity pool ID from Cognito. You can get this from the Cognito console.
 
 1. Find the variable **IDENTITY_POOL_ID** and update the variable with your identity pool.
-2. Go back to the command line and type:
+2. Find the variable **AWS.config.region** and update the variable with your region.
+3. Go back to the command line and type:
 ```
 gulp build
 ```
-3. Change the directory back to the main serverless directory and type:
+4. Change the directory back to the main serverless directory and type:
 ```
 sls client deploy
 ```
-4. Serverless will output an S3 link. Put that S3 link in your browser and check out your static site!!
+5. Serverless will output an S3 link. Put that S3 link in your browser and check out your static site!!
 
 ## Bringing it all together
 
