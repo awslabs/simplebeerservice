@@ -82,8 +82,8 @@ $( document ).ready(function() {
           console.log(err);
           return;
       }
-      var requestUrl = SigV4Utils.getSignedUrl('wss', 'data.iot.us-east-1.amazonaws.com', '/mqtt',
-          'iotdevicegateway', 'us-east-1',
+      var requestUrl = SigV4Utils.getSignedUrl('wss', 'data.iot.' + AWS.config.region + '.amazonaws.com', '/mqtt',
+          'iotdevicegateway', AWS.config.region,
           credentials.accessKeyId, credentials.secretAccessKey, credentials.sessionToken);
       initClient(requestUrl);
   });

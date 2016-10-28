@@ -28,9 +28,9 @@ const options = commandLineArgs(optionDefinitions);
 var data = [];
 try {
   var device = awsIot.device({
-    keyPath: "cert/private.pem.key",
-    certPath: "cert/certificate.pem.crt",
-    caPath: "cert/root.pem.crt",
+    keyPath: "certs/private.pem.key",
+    certPath: "certs/certificate.pem.crt",
+    caPath: "certs/root.pem.crt",
     clientId: options.unitid,
     region: options.region
   });
