@@ -38,60 +38,6 @@
     }
   },
   "Resources": {
-    "IamIoTRoleLambda": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "lambda.amazonaws.com"
-                ]
-              },
-              "Action": [
-                "sts:AssumeRole"
-              ]
-            }
-          ]
-        },
-        "Path": "/"
-      }
-    },
-    "IamIoTPolicyLambda": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyName": "${stage}-${project}-lambda-iot",
-        "PolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents"
-              ],
-              "Resource": "arn:aws:logs:${region}:*:*"
-            },
-            {
-              "Effect": "Allow",
-              "Action": "iot:Publish",
-              "Resource": [
-                  "arn:aws:iot:us-east-1:147755086966:topicfilter/sbs/*"
-              ]
-            }
-          ]
-        },
-        "Roles": [
-          {
-            "Ref": "IamIoTRoleLambda"
-          }
-        ]
-      }
-    },
     "IamRoleLambda": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -135,60 +81,6 @@
         "Roles": [
           {
             "Ref": "IamRoleLambda"
-          }
-        ]
-      }
-    },
-    "IamRoleElasticSearch": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "lambda.amazonaws.com"
-                ]
-              },
-              "Action": [
-                "sts:AssumeRole"
-              ]
-            }
-          ]
-        },
-        "Path": "/"
-      }
-    },
-    "IamPolicyElasticSearch": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyName": "${stage}-${project}-lambda-es",
-        "PolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents"
-              ],
-              "Resource": "arn:aws:logs:${region}:*:*"
-            },
-            {
-              "Action": [
-                  "es:*"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            }
-          ]
-        },
-        "Roles": [
-          {
-            "Ref": "IamRoleElasticSearch"
           }
         ]
       }
@@ -285,42 +177,6 @@
       "Properties": {
         "BucketName": "logs.${stage}.${region}.${domain}"
       }
-    },
-    "ElasticsearchDomain": {
-      "Type": "AWS::Elasticsearch::Domain",
-      "Properties": {
-        "ElasticsearchClusterConfig": {
-          "DedicatedMasterEnabled": "true",
-          "InstanceCount": "2",
-          "ZoneAwarenessEnabled": "true",
-          "InstanceType": "m3.medium.elasticsearch",
-          "DedicatedMasterType": "m3.medium.elasticsearch",
-          "DedicatedMasterCount": "3"
-        },
-        "EBSOptions": {
-          "EBSEnabled": true,
-          "Iops": 0,
-          "VolumeSize": 20,
-          "VolumeType": "gp2"
-        },
-        "SnapshotOptions": {
-          "AutomatedSnapshotStartHour": "0"
-        },
-        "AccessPolicies": {
-          "Version": "2012-10-17",
-          "Statement": [{
-            "Effect": "Allow",
-            "Principal": {
-              "AWS": "*"
-            },
-            "Action": "es:*",
-            "Resource": "*"
-          }]
-        },
-        "AdvancedOptions": {
-          "rest.action.multi.allow_explicit_index": "true"
-        }
-      }
     }
 },
 "Outputs": {
@@ -338,14 +194,13 @@
       "Ref": "LogsBucket"
     }
   },
-  "ElasticSearchDomainEndpoint": {
+  "IamRoleArnLambda": {
+    "Description": "ARN of the lambda IAM role",
     "Value": {
-      "Fn::GetAtt" : [ "ElasticsearchDomain", "DomainEndpoint" ]
-    }
-  },
-  "IamElasticSearchRoleARN": {
-    "Value": {
-      "Fn::GetAtt" : [ "IamRoleElasticSearch", "Arn" ]
+      "Fn::GetAtt": [
+        "IamRoleLambda",
+        "Arn"
+      ]
     }
   }
 }
