@@ -55,7 +55,7 @@ var device = awsIot.device({
     keyPath: config.certs.privateKey,
     certPath: config.certs.certificate,
     caPath: config.certs.caCert,
-    clientId: unitID,
+    clientId: options.unitid,
     region: options.region
 });
 
@@ -99,7 +99,7 @@ function log(type, message) {
 function generatePayload() {
   var payload = {
     "version": "5",
-    "deviceId": unitID,
+    "deviceId": options.unitid,
     "data": data
   }
   data = [];
@@ -135,7 +135,7 @@ function initReaders() {
 function startupRoutine() {
   /* Setup the components */
   try {
-    log(sbsID+"init",JSON.stringify(options));
+    log(options.unitid+"init",JSON.stringify(options));
     components.lcd.useChar("heart");
     board.pinMode("A0", five.Pin.INPUT);
     log("Board",ifaces);
