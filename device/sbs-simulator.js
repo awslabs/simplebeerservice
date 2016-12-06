@@ -124,7 +124,7 @@ try {
   console.log("Connecting to AWS IoT...");
   device.on("connect", function() {
     console.log("Connected to AWS IoT.");
-    setInterval(consistent, 1000);
+    setInterval(run, 1000);
     setInterval(function() {
       console.log("Message: ",messages[Math.floor(Math.random()*4)]);
     },10000);
