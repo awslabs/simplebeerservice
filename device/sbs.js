@@ -18,6 +18,7 @@ var LCDScreen = require("./components/grove-lcd.js");
 var TempSensor = require("./components/grove-temp-sensor.js");
 var SoundSensor = require("./components/grove-sound-sensor.js");
 var FlowSensor = require("./components/grove-flow-sensor.js");
+var UltrasonicRanger = require("./components/grove-ultrasonic-ranger.js");
 var awsIot = require("aws-iot-device-sdk");
 var Edison = require("edison-io");
 var os = require('os');
@@ -82,7 +83,8 @@ try {
     "sensors": {
       "Sound": new SoundSensor(config.components.sensors.Sound, board),
       "Temperature": new TempSensor(config.components.sensors.Temperature),
-      "Flow": new FlowSensor(config.components.sensors.Flow)
+      "Flow": new FlowSensor(config.components.sensors.Flow),
+      "Proximity": new UltrasonicRanger(config.components.sensors.Proximity)
     }
   }
 } catch (e) {
@@ -102,7 +104,7 @@ function generatePayload() {
     "deviceId": options.unitid,
     "data": data
   }
-  data = [{"timestamp":new Date().getTime(),"value":43,"type":"Humidity"}];
+  data = [];
   if (options.verbose) {
     board.info("Payload",JSON.stringify(payload));
   }
