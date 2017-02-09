@@ -51,7 +51,7 @@ var PUBLISH_INTERVAL = config.intervals.publish;
 var ROTATE_MESSAGE_INTERVAL = config.intervals.rotateMessages;
 
 var unitID = options.unitid;
-var device = awsIot.device({
+var device = awsIot.thingShadow({
     keyPath: config.certs.privateKey,
     certPath: config.certs.certificate,
     caPath: config.certs.caCert,
@@ -102,7 +102,7 @@ function generatePayload() {
     "deviceId": options.unitid,
     "data": data
   }
-  data = [];
+  data = [{"timestamp":new Date().getTime(),"value":43,"type":"Humidity"}];
   if (options.verbose) {
     board.info("Payload",JSON.stringify(payload));
   }
@@ -132,8 +132,10 @@ function initReaders() {
   });
 }
 
+
 function startupRoutine() {
   /* Setup the components */
+  var clientTokenUpdate;
   try {
     log(options.unitid+"init",JSON.stringify(options));
     components.lcd.useChar("heart");
@@ -148,10 +150,44 @@ function startupRoutine() {
     components.leds.red.blink(100);
     try {
       device.on("connect", function() {
-        log("AWS IoT","Connected to AWS IoT...");
-        components.leds.red.stop().off();
-        components.lcd.printRGB(colors.green,"Connected!","TO AWS IoT");
-      });
+          device.register( options.unitid, function() {
+            var sbsState = {
+              "desired": {
+                "data": {
+                  "temp": components.sensors['Temperature'].read(),
+                  "humidity": 43
+                }
+              }
+            };
+            var clientTokenUpdate = device.update( options.unitid, sbsState );
+            if (clientTokenUpdate === null)
+                 {
+                    console.log('update shadow failed, operation still in progress');
+                 }
+          });
+          log("AWS IoT","Connected to AWS IoT...");
+          components.leds.red.stop().off();
+          components.lcd.printRGB(colors.green,"Connected!","TO AWS IoT");
+        });
+
+        device.on('status',
+        function(thingName, stat, clientToken, stateObject) {
+           console.log('received '+stat+' on '+thingName+': '+
+                       JSON.stringify(stateObject));
+        });
+
+        device.on('delta',
+        function(thingName, stateObject) {
+           console.log('received delta on '+thingName+': '+
+                       JSON.stringify(stateObject));
+        });
+
+        device.on('timeout',
+        function(thingName, clientToken) {
+           console.log('received timeout on '+thingName+
+                       ' with token: '+ clientToken);
+        });
+
     } catch (e) {
       log("AWS IoT","Failed to connect."+e);
     }

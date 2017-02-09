@@ -35,7 +35,7 @@ try {
     region: options.region
   });
 
-  var topic = "sbs/"+options.unitid;
+  var topic = "test/"+options.unitid;
 
   var messages = [
     {"line1":"I :heart: beer!","line2":"How about you?"},
@@ -56,8 +56,8 @@ try {
       "data": data
     }
     data = [];
-    console.log("Payload: ", JSON.stringify(payload));
-    return JSON.stringify(payload);
+    console.log("Payload: ", "eyAidGVzdCI6ICJ0ZXN0IiB9");
+    return "eyAidGVzdCI6ICJ0ZXN0IiB9";
   }
 
   // Generates a random flow count every 10 iterations.
