@@ -99,7 +99,7 @@ Once you get the prints back, you will need a few screws to tie everything toget
 Install the [Serverless Framework](http://serverless.com), [Yeoman](http://yeoman.io), [Bower](http://bower.io) and [Gulp](http://gulpjs.com). You can do this all with a single command:
 
 ```
-npm install -g serverless yo bower gulp
+npm install -g serverless@0.5.5 yo bower gulp
 ```
 
 > **Note:** You may need to run "sudo" to install these as an administrator.
