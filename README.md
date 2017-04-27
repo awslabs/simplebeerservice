@@ -231,15 +231,15 @@ bower install
 
 Before we get going, here is a quick intro to a tool called **Gulp**. Gulp is a task manager for Node.js applications. It enables us to wire up commands that will perform common tasks. Here are a few we will use today. Go ahead and try them out!
 
-> ```
+```
 gulp serve
 ```
 > This command will run a local webserver that is listening for any changes to your app directory. If there are an file changes, it will reload the local running web application. This is great for development, as you can see changes live as you update the code.
-> ```
+```
 gulp build
 ```
 > This command will package up all of the files you need for your static site and write them into your **/dist/** folder. This is the folder that serverless is using when it publishes your S3 static files.
-> ```
+```
 gulp test
 ```
 > This command will run the unit tests defined in the **/test/** folder. For this project, we have not defined any unit test.
