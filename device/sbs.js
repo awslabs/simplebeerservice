@@ -27,12 +27,13 @@ var async = require('async');
 var config = require("./device.json");
 var ifaces = os.networkInterfaces();
 var bus = 6;
+var defaultFreq = 25;
 
 const commandLineArgs = require('command-line-args')
 const optionDefinitions = [
   { name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
   { name: 'region', alias: 'r', type: String, defaultValue: config.region },
-  { name: 'unitid', alias: 'u', type: String, defaultValue: config.deviceId }
+  { name: 'unitid', alias: 'u', type: String, defaultValue: config.thingName }
 ]
 const options = commandLineArgs(optionDefinitions)
 
@@ -63,7 +64,7 @@ var device = awsIot.thingShadow({
 var logs = [];
 var data = [];
 
-var topic = config.topic+"/"+unitID;
+var topic = config.topicName +"/"+unitID;
 var logtopic = config.logTopic+"/"+unitID;
 var colors = {
   "green": [ 0, 255, 0 ],
@@ -158,7 +159,10 @@ function startupRoutine() {
                 "data": {
                   "temp": components.sensors['Temperature'].read(),
                   "humidity": 43
-                }
+                },
+                "color": [100,150,155],
+                "full": options.unitid,
+                "short": options.unitid
               }
             };
             var clientTokenUpdate = device.update( options.unitid, sbsState );
