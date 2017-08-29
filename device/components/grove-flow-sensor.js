@@ -1,7 +1,7 @@
 var GroveSensor = require("./grove-sensor.js");
 
-FlowSensor = function(pin) {
-  GroveSensor.call(this, { pin : pin, type: "digital" });
+FlowSensor = function(pin, freq) {
+  GroveSensor.call(this, { pin : pin, type: "digital", freq: freq });
 };
 
 FlowSensor.prototype = Object.create(GroveSensor.prototype);

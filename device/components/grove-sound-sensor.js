@@ -1,7 +1,7 @@
 var GroveSensor = require("./grove-sensor.js");
 
-SoundSensor = function(pin) {
-  GroveSensor.call(this, { pin: pin });
+SoundSensor = function(pin, freq) {
+  GroveSensor.call(this, { pin : pin, freq: freq });
 };
 
 SoundSensor.prototype = Object.create(GroveSensor.prototype, {
