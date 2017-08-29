@@ -203,9 +203,11 @@ board.on("ready", function() {
   startupRoutine();
 
   components.sensors.Flow.on("change", function() {
-      //log("Flow", this.flowCount);
-      this.incrementFlowCount();
-      components.leds.blue.on();
+    // log("Flow", this.value);
+      if (this.value > 0) {
+        this.incrementFlowCount();
+        components.leds.blue.on();
+      }
   });
 
   this.loop(ROTATE_MESSAGE_INTERVAL, function() {
