@@ -1,4 +1,5 @@
 var GroveSensor = require("./grove-sensor.js");
+var DEFAULT_READ_INTERVAL = 1000;
 
 SoundSensor = function(pin, freq) {
   GroveSensor.call(this, { pin : pin, freq: freq });
@@ -12,7 +13,7 @@ SoundSensor.prototype = Object.create(GroveSensor.prototype, {
     value: false
   },
   readInterval: {
-    value: 500
+    value: DEFAULT_READ_INTERVAL
   },
   read: {
     value: function() {
