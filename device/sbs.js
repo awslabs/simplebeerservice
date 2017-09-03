@@ -86,7 +86,7 @@ try {
        "Sound": new SoundSensor(config.components.sensors.Sound.pin, ('freq' in config.components.sensors.Sound) ? config.components.sensors.Sound.freq : defaultFreq  ),
        "Temperature": new TempSensor(config.components.sensors.Temperature.pin, ('freq' in config.components.sensors.Temperature) ? config.components.sensors.Temperature.freq : defaultFreq  ),
         "Flow": new FlowSensor(config.components.sensors.Flow.pin, ('freq' in config.components.sensors.Flow) ? config.components.sensors.Flow.freq : defaultFreq ),
-        "Proximity": new UltrasonicRanger(config.components.sensors.Proximity.pin, ('freq' in config.components.sensors.Proximity) ? config.components.sensors.Proximity.freq : defaultFreq  )
+        // "Proximity": new UltrasonicRanger(config.components.sensors.Proximity.pin, ('freq' in config.components.sensors.Proximity) ? config.components.sensors.Proximity.freq : defaultFreq  )
     }
   }
 } catch (e) {
