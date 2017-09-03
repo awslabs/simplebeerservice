@@ -70,6 +70,26 @@ GroveLCD.prototype = Object.create(five.LCD.prototype, {
       }
     }
   },
+  updateConfig: {
+    value: function(config, reset) {
+      this.messages = config.messages;
+      this.interval.autoscroll = config.intervals.autoScroll;
+      this.interval.messages = config.intervals.rotateMessages;
+
+      if (reset) {
+        // reset auto-scroll
+        clearTimeout(this.timer.scroll);
+        clearTimeout(this.timer.message);
+        this.autoscroll.position = 0;
+        this.startAutoScroll();
+      }
+    }
+  },
+  updateKegData: {
+    value: function(data) {
+      this.kegdata = data;
+    }
+  },
   displayBeerMessage: {
     value: function (lcd) {
       // only display messages if we have beer info to display

@@ -29,6 +29,7 @@ var config = require("./device.json");
 var ifaces = os.networkInterfaces();
 var bus = 6;
 var defaultFreq = 25;
+var kegdata = {};
 
 const commandLineArgs = require('command-line-args')
 const optionDefinitions = [
@@ -144,8 +145,58 @@ function initReaders() {
   });
 }
  
+function recurseUpdate(initial, update){
+    for(prop in initial){
+        if({}.hasOwnProperty.call(initial, prop) && {}.hasOwnProperty.call(update, prop)){
+            if(typeof initial[prop] === 'object' && typeof update[prop] === 'object'){
+                recurseUpdate(initial[prop], update[prop]);
+            }
+            else{
+                initial[prop] = update[prop];
+            }
+        }
+    }
 }
 
+function updateFromShadow(shadow, isDelta) {
+  var updateShadow = false;
+  update = (isDelta) ? shadow.state : shadow.state.desired;
+
+  if (update == null) { // we can ignore message if we have no desired object and its not an update
+    return;
+  }
+
+  if ('kegdata' in update) {
+    if (Object.keys(kegdata).length == 0) { // deal wth empty initial kegdata
+      kegdata = update.kegdata;
+    }
+    else {
+      recurseUpdate(kegdata, update.kegdata);
+    }
+    components.lcd.updateKegData(kegdata);
+    updateShadow = true;
+  }
+  
+  if ('config' in update) {
+    recurseUpdate(config, update.config);
+    components.lcd.updateConfig(config, true)
+    updateShadow = true;
+  }
+
+  if (updateShadow) {
+    shadowAccess.take(function() {
+      var sbsState = {
+        "state" : {
+          "reported": {
+            "kegdata": kegdata,
+            "config": config
+          }
+        }
+      };
+      device.update( options.unitid, sbsState );
+    });
+  }
+}
 
 function startupRoutine() {
   /* Setup the components */
@@ -197,12 +248,15 @@ function startupRoutine() {
            console.log('received '+stat+' on '+thingName+': '+
                        JSON.stringify(stateObject));
            shadowAccess.leave();
+           updateFromShadow(stateObject, false);
+           
         });
 
         device.on('delta',
         function(thingName, stateObject) {
            console.log('received delta on '+thingName+': '+
                        JSON.stringify(stateObject));
+           updateFromShadow(stateObject, true);
         });
 
         device.on('timeout',
