@@ -24,6 +24,7 @@ var Edison = require("edison-io");
 var os = require('os');
 var sleep = require('sleep');
 var async = require('async');
+var shadowAccess = require('semaphore')(1);
 var config = require("./device.json");
 var ifaces = os.networkInterfaces();
 var bus = 6;
@@ -148,7 +149,7 @@ function initReaders() {
 
 function startupRoutine() {
   /* Setup the components */
-  var clientTokenUpdate;
+  var token;
   try {
     log(options.unitid+"init",JSON.stringify(options));
     components.lcd.useChar("heart");
@@ -163,23 +164,28 @@ function startupRoutine() {
     components.leds.red.blink(100);
     try {
       device.on("connect", function() {
-          device.register( options.unitid, function() {
-            var sbsState = {
-              "desired": {
-                "data": {
-                  "temp": components.sensors['Temperature'].read(),
-                  "humidity": 43
-                },
-                "color": [100,150,155],
-                "full": options.unitid,
-                "short": options.unitid
-              }
-            };
-            var clientTokenUpdate = device.update( options.unitid, sbsState );
-            if (clientTokenUpdate === null)
-                 {
-                    console.log('update shadow failed, operation still in progress');
-                 }
+          device.register( options.unitid, {}, function() {
+
+            shadowAccess.take(function() {
+              token = device.get(options.unitid);
+              console.log("get token: "+token);
+            });
+
+            shadowAccess.take(function() {
+              console.log("starting update");
+              var sbsState = {
+                "state" : {
+                  "reported": {
+                    "device": {
+                      "interfaces": ifaces,
+                      "config": config
+                    },                  
+                  }
+                }
+              };
+              token = device.update( options.unitid, sbsState );
+              console.log("get token: "+token);
+            });
           });
           log("AWS IoT","Connected to AWS IoT...");
           components.leds.red.stop().off();
@@ -190,6 +196,7 @@ function startupRoutine() {
         function(thingName, stat, clientToken, stateObject) {
            console.log('received '+stat+' on '+thingName+': '+
                        JSON.stringify(stateObject));
+           shadowAccess.leave();
         });
 
         device.on('delta',
@@ -202,6 +209,7 @@ function startupRoutine() {
         function(thingName, clientToken) {
            console.log('received timeout on '+thingName+
                        ' with token: '+ clientToken);
+           shadowAccess.leave();
         });
 
     } catch (e) {
