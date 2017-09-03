@@ -133,6 +133,16 @@ function initReaders() {
   }, function(err) {
     log("Init","Complete");
   });
+
+  components.sensors.Flow.on("change", function() {
+    // log("Flow", this.value);
+      if (this.value > 0) {
+        this.incrementFlowCount();
+        components.leds.blue.on();
+      }
+  });
+}
+ 
 }
 
 
@@ -205,15 +215,6 @@ function startupRoutine() {
 board.on("ready", function() {
 
   startupRoutine();
-
-  components.sensors.Flow.on("change", function() {
-    // log("Flow", this.value);
-      if (this.value > 0) {
-        this.incrementFlowCount();
-        components.leds.blue.on();
-      }
-  });
-
   this.loop(ROTATE_MESSAGE_INTERVAL, function() {
     try {
       components.lcd.displayRandomMessage();
