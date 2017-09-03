@@ -52,7 +52,6 @@ if (options.verbose) {
 }
 
 var PUBLISH_INTERVAL = config.intervals.publish;
-var ROTATE_MESSAGE_INTERVAL = config.intervals.rotateMessages;
 
 var unitID = options.unitid;
 var device = awsIot.thingShadow({
@@ -82,7 +81,7 @@ try {
       "green": new five.Led(config.components.leds.green),
       "red": new five.Led(config.components.leds.red)
     },
-    "lcd": new LCDScreen(config.messages),
+    "lcd": new LCDScreen(config),
     "sensors": {
        "Sound": new SoundSensor(config.components.sensors.Sound.pin, ('freq' in config.components.sensors.Sound) ? config.components.sensors.Sound.freq : defaultFreq  ),
        "Temperature": new TempSensor(config.components.sensors.Temperature.pin, ('freq' in config.components.sensors.Temperature) ? config.components.sensors.Temperature.freq : defaultFreq  ),
@@ -277,14 +276,7 @@ function startupRoutine() {
 board.on("ready", function() {
 
   startupRoutine();
-  this.loop(ROTATE_MESSAGE_INTERVAL, function() {
-    try {
-      components.lcd.displayRandomMessage();
-    } catch (e) {
-      log("ErrorInBoot",e);
-    }
-  });
-
+  components.lcd.startAutoScroll();
   initReaders();
 
   this.loop(PUBLISH_INTERVAL, function() {

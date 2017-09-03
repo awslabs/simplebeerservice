@@ -5,7 +5,8 @@
     "region": "us-east-1",
     "intervals": {
         "rotateMessages": 10000,
-        "publish": 1020
+        "publish": 1020,
+        "autoScroll": 1000
     },
     "topicName": "simpleBeerEdisonTopic",
     "logTopic": "simpleBeerEdisonTopicLogs",
@@ -38,20 +39,18 @@
     },
     "messages": [
         {
-            "line1": "I :heart: beer!",
-            "line2": "How about you?"
+            "line1": "Beer: %s, from %s brewery",
+            "line1vars": ["name", "brewery"],
+            "line2": "Description: %s",
+            "line2vars": ["desc"],
+            "color": "#f442ce"
         },
         {
-            "line1": "Step right up...",
-            "line2": "and grab a beer!"
-        },
-        {
-            "line1": "What a beautiful",
-            "line2": "day for a beer!"
-        },
-        {
-            "line1": "HEY! YOU!",
-            "line2": "Want a beer?"
+            "line1": "Beer is at %2f%% used.",
+            "line1vars": ["used"],
+            "line2": "Only %f liters left!",
+            "line2vars": ["left"],
+             "color": "#f2a7e2"
         }
     ]
 }
