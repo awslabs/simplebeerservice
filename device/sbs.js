@@ -25,11 +25,14 @@ var os = require('os');
 var sleep = require('sleep');
 var async = require('async');
 var shadowAccess = require('semaphore')(1);
+var configUpdate = require('semaphore')(1);
 var config = require("./device.json");
 var ifaces = os.networkInterfaces();
 var bus = 6;
 var defaultFreq = 25;
 var kegdata = {};
+var components = null;
+var lcd = null;
 
 const commandLineArgs = require('command-line-args')
 const optionDefinitions = [
@@ -74,23 +77,32 @@ var colors = {
   "blue": [ 0, 0, 255 ],
 }
 
-try {
-  var components = {
-    "leds": {
-      "blue": new five.Led(config.components.leds.blue),
-      "green": new five.Led(config.components.leds.green),
-      "red": new five.Led(config.components.leds.red)
-    },
-    "lcd": new LCDScreen(config),
-    "sensors": {
-       "Sound": new SoundSensor(config.components.sensors.Sound.pin, ('freq' in config.components.sensors.Sound) ? config.components.sensors.Sound.freq : defaultFreq  ),
-       "Temperature": new TempSensor(config.components.sensors.Temperature.pin, ('freq' in config.components.sensors.Temperature) ? config.components.sensors.Temperature.freq : defaultFreq  ),
-        "Flow": new FlowSensor(config.components.sensors.Flow.pin, ('freq' in config.components.sensors.Flow) ? config.components.sensors.Flow.freq : defaultFreq ),
-        // "Proximity": new UltrasonicRanger(config.components.sensors.Proximity.pin, ('freq' in config.components.sensors.Proximity) ? config.components.sensors.Proximity.freq : defaultFreq  )
+function initLCD() {
+  lcd = new LCDScreen(config);
+}
+
+function initSensors(callback) {
+  configUpdate.take(function() {
+    try {
+      components = {
+        "leds": {
+          "blue": new five.Led(config.components.leds.blue),
+          "green": new five.Led(config.components.leds.green),
+          "red": new five.Led(config.components.leds.red)
+        },
+        "lcd": lcd,
+        "sensors": {
+          "Sound": new SoundSensor(config.components.sensors.Sound.pin, ('freq' in config.components.sensors.Sound) ? config.components.sensors.Sound.freq : defaultFreq  ),
+          "Temperature": new TempSensor(config.components.sensors.Temperature.pin, ('freq' in config.components.sensors.Temperature) ? config.components.sensors.Temperature.freq : defaultFreq  ),
+            "Flow": new FlowSensor(config.components.sensors.Flow.pin, ('freq' in config.components.sensors.Flow) ? config.components.sensors.Flow.freq : defaultFreq ),
+            // "Proximity": new UltrasonicRanger(config.components.sensors.Proximity.pin, ('freq' in config.components.sensors.Proximity) ? config.components.sensors.Proximity.freq : defaultFreq  )
+        }
+      }   
+    } catch (e) {
+      log('ErrorInit',e);
     }
-  }
-} catch (e) {
-  log('ErrorInit',e);
+    callback();
+  });
 }
 
 function log(type, message) {
@@ -130,7 +142,6 @@ function initReaders() {
         })
       }
     });
-    callback();
   }, function(err) {
     log("Init","Complete");
   });
@@ -172,13 +183,13 @@ function updateFromShadow(shadow, isDelta) {
     else {
       recurseUpdate(kegdata, update.kegdata);
     }
-    components.lcd.updateKegData(kegdata);
+    lcd.updateKegData(kegdata);
     updateShadow = true;
   }
   
   if ('config' in update) {
     recurseUpdate(config, update.config);
-    components.lcd.updateConfig(config, true)
+    lcd.updateConfig(config, true);
     updateShadow = true;
   }
 
@@ -197,32 +208,30 @@ function updateFromShadow(shadow, isDelta) {
   }
 }
 
-function startupRoutine() {
+function startupRoutine(callback) {
   /* Setup the components */
   var token;
   try {
     log(options.unitid+"init",JSON.stringify(options));
-    components.lcd.useChar("heart");
+    lcd.useChar("heart");
     board.pinMode("A0", five.Pin.INPUT);
     log("Board",ifaces);
-    components.lcd.printRGB(colors.blue,"SBS 5.0 Starting","IP:"+ifaces.wlan0[0].address);
+    lcd.printRGB(colors.blue,"SBS 5.0 Starting","IP:"+ifaces.wlan0[0].address);
     sleep.sleep(3);
-    components.lcd.printRGB(colors.blue,"Location set to",config.location);
+    lcd.printRGB(colors.blue,"Location set to",config.location);
     sleep.sleep(3);
-    components.lcd.printRGB(colors.red,"Connecting...","to AWS IoT");
+    lcd.printRGB(colors.red,"Connecting...","to AWS IoT");
     log("AWS IoT","Connecting to AWS IoT...");
-    components.leds.red.blink(100);
+
     try {
       device.on("connect", function() {
           device.register( options.unitid, {}, function() {
 
             shadowAccess.take(function() {
               token = device.get(options.unitid);
-              console.log("get token: "+token);
             });
 
             shadowAccess.take(function() {
-              console.log("starting update");
               var sbsState = {
                 "state" : {
                   "reported": {
@@ -234,20 +243,23 @@ function startupRoutine() {
                 }
               };
               token = device.update( options.unitid, sbsState );
-              console.log("get token: "+token);
             });
           });
           log("AWS IoT","Connected to AWS IoT...");
-          components.leds.red.stop().off();
-          components.lcd.printRGB(colors.green,"Connected!","TO AWS IoT");
+          lcd.printRGB(colors.green,"Connected!","TO AWS IoT");
         });
 
         device.on('status',
         function(thingName, stat, clientToken, stateObject) {
            console.log('received '+stat+' on '+thingName+': '+
                        JSON.stringify(stateObject));
-           shadowAccess.leave();
            updateFromShadow(stateObject, false);
+           shadowAccess.leave();
+
+          // On initial start we wait until device shadow over-ride config is read before initalizing sensors 
+           if (! configUpdate.available()) {
+             configUpdate.leave();
+           }
            
         });
 
@@ -271,34 +283,41 @@ function startupRoutine() {
   } catch (e) {
     log('Error',e);
   }
+  callback();
 }
 
+//
+// MAIN
+//
+
+
 board.on("ready", function() {
-
-  startupRoutine();
-  components.lcd.startAutoScroll();
-  initReaders();
-
-  this.loop(PUBLISH_INTERVAL, function() {
-      try {
-        for (var i = 0, len = logs.length; i < len; i++) {
-          device.publish(logtopic, JSON.stringify(logs[i]));
+  initLCD();
+  lcd.startAutoScroll();
+  configUpdate.take(function() {
+    async.parallel([startupRoutine, initSensors], function() { 
+      initReaders();
+      board.loop(PUBLISH_INTERVAL, function() {
+        try {
+          for (var i = 0, len = logs.length; i < len; i++) {
+            device.publish(logtopic, JSON.stringify(logs[i]));
+            if (options.verbose) {
+              board.info('PublishLog', JSON.stringify(logs[i]));
+            }
+          }
+          logs = [];
+        } catch (e) {
           if (options.verbose) {
-            board.info('PublishLog', JSON.stringify(logs[i]));
+            board.info('ErrorLog','Error publishing log.' + e);
           }
         }
-        logs = [];
-      } catch (e) {
-        if (options.verbose) {
-          board.info('ErrorLog','Error publishing log.' + e);
-        }
-      }
-      components.leds.green.on();
-      components.leds.blue.off();
-      device.publish(topic, generatePayload());
-      setTimeout(function() {
-        components.leds.green.off();
-      }, 100);
+        components.leds.green.on();
+        components.leds.blue.off();
+        device.publish(topic, generatePayload());
+        setTimeout(function() {
+          components.leds.green.off();
+        }, 100);
+      });
+    });
   });
-
 });
