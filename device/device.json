@@ -4,9 +4,9 @@
     "short": "YVR",
     "region": "us-east-1",
     "intervals": {
-        "rotateMessages": 10000,
+        "rotateMessages": 30000,
         "publish": 1020,
-        "autoScroll": 1000
+        "autoScroll": 400
     },
     "topicName": "simpleBeerEdisonTopic",
     "logTopic": "simpleBeerEdisonTopicLogs",

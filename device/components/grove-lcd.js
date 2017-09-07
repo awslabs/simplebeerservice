@@ -9,6 +9,7 @@ GroveLCD = function(config) {
   this.messages = null;
   this.autoscroll.lines = [];
   this.autoscroll.linepos = [];
+  this.autoscroll.wait = [];
   this.interval = {
     autoscroll: null,
     messages: null
@@ -46,6 +47,7 @@ GroveLCD.prototype = Object.create(five.LCD.prototype, {
       value: function() {
       this.timer.scroll  = setInterval(this.printContinousScrolling, this.interval.autoscroll, this);
       this.timer.message = setInterval(this.displayBeerMessage, this.interval.messages, this);
+      this.displayBeerMessage(this);
     }
   },
   printContinousScrolling: {
@@ -55,14 +57,22 @@ GroveLCD.prototype = Object.create(five.LCD.prototype, {
       }
       for (var i=0; i < lcd.autoscroll.lines.length; i++) {
         if (lcd.autoscroll.lines[i].length > 16) { // scroll if length of overall line greater than 16 characters
-          var re = new RegExp('.{1,' + 16 + '}', 'g');
-          s = lcd.autoscroll.lines[i].match(re);
-          if (lcd.autoscroll.linepos[i] == null || lcd.autoscroll.linepos[i] >= s.length -1) {
+ 
+          if (lcd.autoscroll.linepos[i] == null) {
             lcd.autoscroll.linepos[i] = 0;
+          }
+
+          if (lcd.autoscroll.linepos[i] == 0 || lcd.autoscroll.linepos[i] + 16 >= lcd.autoscroll.lines[i].length) {
+            lcd.autoscroll.wait[i] = (lcd.autoscroll.wait[i] == null) ? 1 : lcd.autoscroll.wait[i] + 1;
+            if (lcd.autoscroll.wait[i] >= 4) {
+              lcd.autoscroll.linepos[i] = (lcd.autoscroll.linepos[i] > 0) ? 0 : 1;
+              lcd.autoscroll.wait[i] = null;
+            }
           } else {
             lcd.autoscroll.linepos[i]++;
           }
-          lcd.cursor(i,0).print(pad(s[lcd.autoscroll.linepos[i]],16));
+          
+          lcd.cursor(i,0).print(lcd.autoscroll.lines[i].substring(lcd.autoscroll.linepos[i], lcd.autoscroll.linepos[i] + 16));
         }
         else {
            lcd.cursor(i,0).print(pad(lcd.autoscroll.lines[i],16));
@@ -115,6 +125,7 @@ GroveLCD.prototype = Object.create(five.LCD.prototype, {
       lcd.autoscroll.lines[0] = vsprintf(lcd.messages[lcd.currentMessage].line1, line1vars);
       lcd.autoscroll.lines[1] = vsprintf(lcd.messages[lcd.currentMessage].line2, line2vars);
       lcd.autoscroll.linepos = [];
+      lcd.autoscroll.wait = [];
       lcd.bgColor(lcd.messages[lcd.currentMessage].color);
 
       // increment next line to display
