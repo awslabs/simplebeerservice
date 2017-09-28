@@ -29,8 +29,9 @@
                 "pin": "A1"
             },
             "Flow": {
-                "pin": 3,
-                "freq": 1
+                "pin": "A2",
+                "freq": 1,
+                "multiplier": 3.2715
             },
             "Proximity": {
                 "pin": 4

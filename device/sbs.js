@@ -18,6 +18,7 @@ var LCDScreen = require("./components/grove-lcd.js");
 var TempSensor = require("./components/grove-temp-sensor.js");
 var SoundSensor = require("./components/grove-sound-sensor.js");
 var FlowSensor = require("./components/grove-flow-sensor.js");
+var AnalogFlowSensor = require("./components/grove-flow-sensor-analog.js");
 var UltrasonicRanger = require("./components/grove-ultrasonic-ranger.js");
 var awsIot = require("aws-iot-device-sdk");
 var Edison = require("edison-io");
@@ -30,6 +31,7 @@ var config = require("./device.json");
 var ifaces = os.networkInterfaces();
 var bus = 6;
 var defaultFreq = 25;
+var defaultMultiplier = 2.25;
 var kegdata = {};
 var components = null;
 var lcd = null;
@@ -92,10 +94,19 @@ function initSensors(callback) {
         },
         "lcd": lcd,
         "sensors": {
-          "Sound": new SoundSensor(config.components.sensors.Sound.pin, ('freq' in config.components.sensors.Sound) ? config.components.sensors.Sound.freq : defaultFreq  ),
-          "Temperature": new TempSensor(config.components.sensors.Temperature.pin, ('freq' in config.components.sensors.Temperature) ? config.components.sensors.Temperature.freq : defaultFreq  ),
-            "Flow": new FlowSensor(config.components.sensors.Flow.pin, ('freq' in config.components.sensors.Flow) ? config.components.sensors.Flow.freq : defaultFreq ),
-            // "Proximity": new UltrasonicRanger(config.components.sensors.Proximity.pin, ('freq' in config.components.sensors.Proximity) ? config.components.sensors.Proximity.freq : defaultFreq  )
+          "Sound": new SoundSensor(
+            config.components.sensors.Sound.pin, 
+            ('freq' in config.components.sensors.Sound) ? config.components.sensors.Sound.freq : defaultFreq  
+          ),
+          "Temperature": new TempSensor(
+            config.components.sensors.Temperature.pin, 
+            ('freq' in config.components.sensors.Temperature) ? config.components.sensors.Temperature.freq : defaultFreq  
+          ),
+          "Flow": new AnalogFlowSensor(
+            config.components.sensors.Flow.pin, 
+            ('freq' in config.components.sensors.Flow) ? config.components.sensors.Flow.freq : defaultFreq, 
+            ('multiplier' in config.components.sensors.Flow) ? config.components.sensors.Flow.multiplier : defaultMultiplier  
+          )
         }
       }   
     } catch (e) {
@@ -144,14 +155,6 @@ function initReaders() {
     });
   }, function(err) {
     log("Init","Complete");
-  });
-
-  components.sensors.Flow.on("change", function() {
-    // log("Flow", this.value);
-      if (this.value > 0) {
-        this.incrementFlowCount();
-        components.leds.blue.on();
-      }
   });
 }
  
