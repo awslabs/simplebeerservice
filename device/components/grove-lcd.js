@@ -108,7 +108,7 @@ GroveLCD.prototype = Object.create(five.LCD.prototype, {
       }
 
       // calculate beer usage data to display
-      lcd.kegdata.used = (lcd.kegdata.usage / lcd.kegdata.size) * 100;
+      lcd.kegdata.used = ((lcd.kegdata.size - lcd.kegdata.usage) / lcd.kegdata.size) * 100;
       lcd.kegdata.left = lcd.kegdata.size - lcd.kegdata.usage;
 
       //substitute in needed variables
