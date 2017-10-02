@@ -280,6 +280,11 @@ function startupRoutine(callback) {
            shadowAccess.leave();
         });
 
+        device.on('error',
+        function(error) {
+          console.log('recieved error: ' + error);
+        });
+
     } catch (e) {
       log("AWS IoT","Failed to connect."+e);
     }
