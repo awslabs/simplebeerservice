@@ -260,3 +260,48 @@ Awesome. Now you know how to work with Gulp! Next, let's open up **app/scripts/m
   ```
 
 4. Serverless will output an S3 link. Put that S3 link in your browser and check out your static site!!
+
+
+### Volume Tracking Backend
+
+#### Kinesis Stream
+
+The following command will create a CloudFormation stack with a Kinesis stream that will receive beer consumption data, and update the IoT Shadow accordingly. You may wish to edit the default values supplied in `stack.json` (in particular, the `IotEndpoint` if deploying in a region other than `us-west-2`).
+
+```bash
+# Run from the root of the repo.
+STACK_NAME=sbs-kinesis \
+TEMPLATE=kinesis \
+PARAMS=stack.json \
+OP=create-stack; \
+aws cloudformation $OP --capabilities CAPABILITY_IAM --stack-name $STACK_NAME --template-body file://cfn/$TEMPLATE/template.yaml --parameters file://cfn/$TEMPLATE/parameters/$PARAMS
+```
+
+It is necessary to create an IoT rule to send events from the device into this stream of the form:
+
+```sql
+SELECT * FROM 'topic_name/thing_name'
+```
+
+#### Reset API
+
+The following command will create a CloudFormation stack with an API Gateway and backing Lambda function; the purpose of this API is to reset the beer consumption amount back to zero.
+
+```bash
+# Run from the root of the repo.
+STACK_NAME=sbs-api \
+TEMPLATE=reset-api \
+PARAMS=stack.json \
+OP=create-stack; \
+aws cloudformation $OP --capabilities CAPABILITY_IAM --stack-name $STACK_NAME --template-body file://cfn/$TEMPLATE/template.yaml --parameters file://cfn/$TEMPLATE/parameters/$PARAMS
+```
+
+To actually perform a reset once the API is live:
+
+```bash
+curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST \
+-d '{"sbs_thing_name": "thingname", "keg_capacity_liters":20, "beer_name":"Blanche de Chambly", "beer_brewery": "Unibroue", "beer_description": "Glorious.", "beer_logo_url": "http://site.com/logo.png"}' \
+https://CFN_PREFIX.execute-api.us-west-2.amazonaws.com/LATEST/sbs-keg-reset --verbose
+```
+
+Optionally, this can be set to require an API Key.

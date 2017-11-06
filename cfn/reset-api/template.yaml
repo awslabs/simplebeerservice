@@ -1,0 +1,323 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Reset API for SBS
+
+Parameters:
+  ResourcePrefix:
+    Type: String
+    MinLength: '2'
+
+  IotEndpoint:
+    Type: String
+    MinLength: 2
+
+Resources:
+  GatewayLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile:
+          "Fn::Sub":
+            - |-
+              console.log('Loading function');
+              var AWS = require('aws-sdk');
+
+              exports.handler = function(event, context, callback) {
+                try {
+                  var iotdata = new AWS.IotData({endpoint: '${endpoint}'});
+
+                  console.log('event', JSON.stringify(event, null, 2));
+
+
+                  var params = {
+                    thingName: event.sbs_thing_name
+                  };
+                  iotdata.getThingShadow(params, function(err, data) {
+                    if (err) {
+                      console.log(err, err.stack);
+                      var error = {
+                        errorCode: 400,
+                        errorMessage: 'error: ' + err
+                      };
+                      context.done(JSON.stringify(error));
+                    } else {
+
+                      let shadow = JSON.parse(data.payload);
+                      delete shadow.state.delta;
+
+                      shadow.state.desired.kegdata.usage = 0;
+                      shadow.state.desired.kegdata.size = event.keg_capacity_liters;
+                      shadow.state.desired.kegdata.name = event.beer_name;
+                      shadow.state.desired.kegdata.brewery = event.beer_brewery;
+                      shadow.state.desired.kegdata.desc = event.beer_description;
+                      shadow.state.desired.kegdata.beer_logo_url = event.beer_logo_url;
+                      var params = {
+                        payload: JSON.stringify(shadow),
+                        thingName: event.sbs_thing_name
+                      };
+
+                      iotdata.updateThingShadow(params, function(err, data) {
+                        if (err) {
+                          var error = {
+                            errorCode: 400,
+                            errorMessage: 'error: ' + err
+                          };
+                          context.done(JSON.stringify(error));
+                        } else {
+                          console.log('Updated shadow successfully for ' + event.sbs_thing_name, JSON.stringify(data, null, 2));
+                          context.done(null, {result: 'Successful update for ' + event.sbs_thing_name});
+                        }
+                      });
+
+                    }
+                  });
+
+
+                } catch(e) {
+                  var error = {
+                    errorCode: 500,
+                    errorMessage: 'Error: ' + e.message
+                  };
+                  context.done(JSON.stringify(error));
+                }
+              };
+
+            - endpoint: { Ref: IotEndpoint }
+
+      Description: A sbs-keg-reset function
+      Handler: index.handler
+      Role:
+        "Fn::GetAtt": [LambdaExecutionRole, Arn]
+      Runtime: nodejs6.10
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: ["sts:AssumeRole"]
+      Policies:
+        - PolicyName: LambdaRole
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+              - Effect: Allow
+                Action:
+                  - "iot:GetThingShadow"
+                  - "iot:UpdateThingShadow"
+                Resource: "*"
+      # ManagedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+
+  GatewayApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name:
+        "Fn::Join":
+          - "-"
+          - - { Ref: ResourcePrefix }
+            - "API"
+      Description: API used for Gateway requests
+      FailOnWarnings: true
+
+  LambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName:
+        "Fn::GetAtt": [GatewayLambda, Arn]
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        "Fn::Join":
+          - ""
+          - - "arn:aws:execute-api:"
+            - { Ref: "AWS::Region" }
+            - ":"
+            - { Ref: "AWS::AccountId" }
+            - ":"
+            - { Ref: "GatewayApi" }
+            - "/*"
+
+  ApiGatewayCloudWatchLogsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [apigateway.amazonaws.com]
+          Action: ["sts:AssumeRole"]
+      Policies:
+      - PolicyName: ApiGatewayLogsPolicy
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:DescribeLogGroups"
+              - "logs:DescribeLogStreams"
+              - "logs:PutLogEvents"
+              - "logs:GetLogEvents"
+              - "logs:FilterLogEvents"
+            Resource: "*"
+
+  ApiGatewayAccount:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn:
+        "Fn::GetAtt": [ApiGatewayCloudWatchLogsRole, Arn]
+
+  GatewayApiStage:
+    DependsOn: [ApiGatewayAccount]
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      DeploymentId: { Ref: "ApiDeployment" }
+      MethodSettings:
+      - DataTraceEnabled: true
+        HttpMethod: "*"
+        LoggingLevel: INFO
+        ResourcePath: /*
+      RestApiId: { Ref: "GatewayApi" }
+      StageName: LATEST
+
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: [GatewayRequest]
+    Properties:
+      RestApiId: { Ref: "GatewayApi" }
+      StageName: DummyStage
+
+  MyResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: { Ref: "GatewayApi" }
+      ParentId:
+        "Fn::GetAtt": [GatewayApi, RootResourceId]
+      # PathPart: "{proxy+}"
+      PathPart: sbs-keg-reset
+
+  KegResetModel:
+    Type: AWS::ApiGateway::Model
+    Properties:
+      RestApiId: { Ref: "GatewayApi" }
+      ContentType: "application/json"
+      Description: "SBS Keg Reset Schema"
+      Name: SbsKegReset
+      Schema:
+        "$schema": "http://json-schema.org/draft-04/schema#"
+        title: SbsKegResetSchema
+        type: object
+        properties:
+          sbs_thing_name:
+            type: string
+          keg_capacity_liters:
+            type: number
+            minimum: 0
+          beer_name:
+            type: string
+          beer_brewery:
+            type: string
+          beer_description:
+            type: string
+          beer_logo_url:
+            type: string
+        required: [sbs_thing_name, keg_capacity_liters, beer_name, beer_brewery, beer_description]
+
+  RequestValidator:
+    Type: "AWS::ApiGateway::RequestValidator"
+    Properties:
+      Name: SbsConformanceValidator
+      RestApiId: { Ref: "GatewayApi" }
+      ValidateRequestBody: "true"
+      ValidateRequestParameters: "false"
+
+
+  GatewayRequest:
+    DependsOn: LambdaPermission
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: POST
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri:
+          "Fn::Join":
+            - ""
+            - - "arn:aws:apigateway:"
+              - { Ref: "AWS::Region" }
+              - ":lambda:path/2015-03-31/functions/"
+              - "Fn::GetAtt": [GatewayLambda, Arn]
+              - "/invocations"
+        IntegrationResponses:
+          - StatusCode: 200
+          - StatusCode: 400
+            SelectionPattern: '.*"errorCode":400.*'
+            ResponseTemplates:
+              "application/json":
+                "Fn::Sub": |
+                  #set ($errorMessageObj = $util.parseJson($input.path('$.errorMessage')))
+                  #set ($bodyObj = $util.parseJson($input.body))
+
+                  {
+                    "errorCode": $errorMessageObj.errorCode,
+                    "errorMessage": "$errorMessageObj.errorMessage"
+                  }
+          - StatusCode: 500
+            SelectionPattern: '.*"errorCode":500.*'
+            ResponseTemplates:
+              "application/json":
+                "Fn::Sub": |
+                  #set ($errorMessageObj = $util.parseJson($input.path('$.errorMessage')))
+                  #set ($bodyObj = $util.parseJson($input.body))
+
+                  {
+                    "errorCode": $errorMessageObj.errorCode,
+                    "errorMessage": "$errorMessageObj.errorMessage"
+                  }
+
+      RequestModels:
+        "application/json": { Ref: KegResetModel }
+      ResourceId: { Ref: "MyResource" }
+      RestApiId: { Ref: "GatewayApi" }
+      MethodResponses:
+        - StatusCode: 200
+        - StatusCode: 400
+        - StatusCode: 500
+
+Outputs:
+  RootUrl:
+    Description: Root URL of the API gateway
+    Value:
+      "Fn::Join":
+        - ""
+        - - "https://"
+          - { Ref: "GatewayApi" }
+          - .execute-api.
+          - { Ref: "AWS::Region" }
+          - ".amazonaws.com"
+
+  CurlCommand:
+    Description: Curl command for the endpoint
+    Value:
+      "Fn::Join":
+        - ""
+        - - 'curl -H "Content-Type: application/json" -H "Accept: application/json" '
+          - '-X POST -d ''{"sbs_thing_name": "thing", "keg_capacity_liters":20, "beer_name":"Blanche de Chambly", "beer_brewery": "Unibroue", "beer_description": "Glorious.",  "beer_logo_url": "http://site.com/logo.png"}'' '
+          - "https://"
+          - { Ref: "GatewayApi" }
+          - .execute-api.
+          - { Ref: "AWS::Region" }
+          - ".amazonaws.com"
+          - "/LATEST/sbs-keg-reset"
