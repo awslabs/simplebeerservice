@@ -18,21 +18,29 @@ var LCDScreen = require("./components/grove-lcd.js");
 var TempSensor = require("./components/grove-temp-sensor.js");
 var SoundSensor = require("./components/grove-sound-sensor.js");
 var FlowSensor = require("./components/grove-flow-sensor.js");
+var AnalogFlowSensor = require("./components/grove-flow-sensor-analog.js");
 var UltrasonicRanger = require("./components/grove-ultrasonic-ranger.js");
 var awsIot = require("aws-iot-device-sdk");
 var Edison = require("edison-io");
 var os = require('os');
 var sleep = require('sleep');
 var async = require('async');
+var shadowAccess = require('semaphore')(1);
+var configUpdate = require('semaphore')(1);
 var config = require("./device.json");
 var ifaces = os.networkInterfaces();
 var bus = 6;
+var defaultFreq = 25;
+var defaultMultiplier = 2.25;
+var kegdata = {};
+var components = null;
+var lcd = null;
 
 const commandLineArgs = require('command-line-args')
 const optionDefinitions = [
   { name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
   { name: 'region', alias: 'r', type: String, defaultValue: config.region },
-  { name: 'unitid', alias: 'u', type: String, defaultValue: config.deviceId }
+  { name: 'unitid', alias: 'u', type: String, defaultValue: config.thingName }
 ]
 const options = commandLineArgs(optionDefinitions)
 
@@ -49,7 +57,6 @@ if (options.verbose) {
 }
 
 var PUBLISH_INTERVAL = config.intervals.publish;
-var ROTATE_MESSAGE_INTERVAL = config.intervals.rotateMessages;
 
 var unitID = options.unitid;
 var device = awsIot.thingShadow({
@@ -63,7 +70,7 @@ var device = awsIot.thingShadow({
 var logs = [];
 var data = [];
 
-var topic = config.topic+"/"+unitID;
+var topic = config.topicName +"/"+unitID;
 var logtopic = config.logTopic+"/"+unitID;
 var colors = {
   "green": [ 0, 255, 0 ],
@@ -72,23 +79,41 @@ var colors = {
   "blue": [ 0, 0, 255 ],
 }
 
-try {
-  var components = {
-    "leds": {
-      "blue": new five.Led(config.components.leds.blue),
-      "green": new five.Led(config.components.leds.green),
-      "red": new five.Led(config.components.leds.red)
-    },
-    "lcd": new LCDScreen(config.messages),
-    "sensors": {
-      "Sound": new SoundSensor(config.components.sensors.Sound, board),
-      "Temperature": new TempSensor(config.components.sensors.Temperature),
-      "Flow": new FlowSensor(config.components.sensors.Flow),
-      "Proximity": new UltrasonicRanger(config.components.sensors.Proximity)
+function initLCD() {
+  lcd = new LCDScreen(config);
+}
+
+function initSensors(callback) {
+  configUpdate.take(function() {
+    try {
+      components = {
+        "leds": {
+          "blue": new five.Led(config.components.leds.blue),
+          "green": new five.Led(config.components.leds.green),
+          "red": new five.Led(config.components.leds.red)
+        },
+        "lcd": lcd,
+        "sensors": {
+          "Sound": new SoundSensor(
+            config.components.sensors.Sound.pin, 
+            ('freq' in config.components.sensors.Sound) ? config.components.sensors.Sound.freq : defaultFreq  
+          ),
+          "Temperature": new TempSensor(
+            config.components.sensors.Temperature.pin, 
+            ('freq' in config.components.sensors.Temperature) ? config.components.sensors.Temperature.freq : defaultFreq  
+          ),
+          "Flow": new AnalogFlowSensor(
+            config.components.sensors.Flow.pin, 
+            ('freq' in config.components.sensors.Flow) ? config.components.sensors.Flow.freq : defaultFreq, 
+            ('multiplier' in config.components.sensors.Flow) ? config.components.sensors.Flow.multiplier : defaultMultiplier  
+          )
+        }
+      }   
+    } catch (e) {
+      log('ErrorInit',e);
     }
-  }
-} catch (e) {
-  log('ErrorInit',e);
+    callback();
+  });
 }
 
 function log(type, message) {
@@ -128,66 +153,136 @@ function initReaders() {
         })
       }
     });
-    callback();
   }, function(err) {
     log("Init","Complete");
   });
 }
+ 
+function recurseUpdate(initial, update){
+    for(prop in initial){
+        if({}.hasOwnProperty.call(initial, prop) && {}.hasOwnProperty.call(update, prop)){
+            if(typeof initial[prop] === 'object' && typeof update[prop] === 'object'){
+                recurseUpdate(initial[prop], update[prop]);
+            }
+            else{
+                initial[prop] = update[prop];
+            }
+        }
+    }
+}
 
+function updateFromShadow(shadow, isDelta) {
+  var updateShadow = false;
+  update = (isDelta) ? shadow.state : shadow.state.desired;
 
-function startupRoutine() {
+  if (update == null) { // we can ignore message if we have no desired object and its not an update
+    return;
+  }
+
+  if ('kegdata' in update) {
+    if (Object.keys(kegdata).length == 0) { // deal wth empty initial kegdata
+      kegdata = update.kegdata;
+    }
+    else {
+      recurseUpdate(kegdata, update.kegdata);
+    }
+    lcd.updateKegData(kegdata);
+    updateShadow = true;
+  }
+  
+  if ('config' in update) {
+    recurseUpdate(config, update.config);
+    lcd.updateConfig(config, true);
+    updateShadow = true;
+  }
+
+  if (updateShadow) {
+    shadowAccess.take(function() {
+      var sbsState = {
+        "state" : {
+          "reported": {
+            "kegdata": kegdata,
+            "config": config
+          }
+        }
+      };
+      device.update( options.unitid, sbsState );
+    });
+  }
+}
+
+function startupRoutine(callback) {
   /* Setup the components */
-  var clientTokenUpdate;
+  var token;
   try {
     log(options.unitid+"init",JSON.stringify(options));
-    components.lcd.useChar("heart");
+    lcd.useChar("heart");
     board.pinMode("A0", five.Pin.INPUT);
     log("Board",ifaces);
-    components.lcd.printRGB(colors.blue,"SBS 5.0 Starting","IP:"+ifaces.wlan0[0].address);
+    lcd.printRGB(colors.blue,"SBS 5.0 Starting","IP:"+ifaces.wlan0[0].address);
     sleep.sleep(3);
-    components.lcd.printRGB(colors.blue,"Location set to",config.location);
+    lcd.printRGB(colors.blue,"Location set to",config.location);
     sleep.sleep(3);
-    components.lcd.printRGB(colors.red,"Connecting...","to AWS IoT");
+    lcd.printRGB(colors.red,"Connecting...","to AWS IoT");
     log("AWS IoT","Connecting to AWS IoT...");
-    components.leds.red.blink(100);
+
     try {
       device.on("connect", function() {
-          device.register( options.unitid, function() {
-            var sbsState = {
-              "desired": {
-                "data": {
-                  "temp": components.sensors['Temperature'].read(),
-                  "humidity": 43
+          device.register( options.unitid, {}, function() {
+
+            shadowAccess.take(function() {
+              token = device.get(options.unitid);
+            });
+
+            shadowAccess.take(function() {
+              var sbsState = {
+                "state" : {
+                  "reported": {
+                    "device": {
+                      "interfaces": ifaces,
+                      "config": config
+                    },                  
+                  }
                 }
-              }
-            };
-            var clientTokenUpdate = device.update( options.unitid, sbsState );
-            if (clientTokenUpdate === null)
-                 {
-                    console.log('update shadow failed, operation still in progress');
-                 }
+              };
+              token = device.update( options.unitid, sbsState );
+            });
           });
           log("AWS IoT","Connected to AWS IoT...");
-          components.leds.red.stop().off();
-          components.lcd.printRGB(colors.green,"Connected!","TO AWS IoT");
+          lcd.printRGB(colors.green,"Connected!","TO AWS IoT");
         });
 
         device.on('status',
         function(thingName, stat, clientToken, stateObject) {
            console.log('received '+stat+' on '+thingName+': '+
                        JSON.stringify(stateObject));
+           updateFromShadow(stateObject, false);
+           shadowAccess.leave();
+
+          // On initial start we wait until device shadow over-ride config is read before initalizing sensors 
+           if (! configUpdate.available()) {
+             configUpdate.leave();
+           }
+           
         });
 
         device.on('delta',
         function(thingName, stateObject) {
            console.log('received delta on '+thingName+': '+
                        JSON.stringify(stateObject));
+           updateFromShadow(stateObject, true);
         });
 
         device.on('timeout',
         function(thingName, clientToken) {
            console.log('received timeout on '+thingName+
                        ' with token: '+ clientToken);
+           shadowAccess.leave();
+        });
+
+        device.on('error',
+        function(error) {
+          console.log('recieved error: ' + error);
         });
 
     } catch (e) {
@@ -196,48 +291,41 @@ function startupRoutine() {
   } catch (e) {
     log('Error',e);
   }
+  callback();
 }
 
+//
+// MAIN
+//
+
+
 board.on("ready", function() {
-
-  startupRoutine();
-
-  components.sensors.Flow.on("change", function() {
-      //log("Flow", this.flowCount);
-      this.incrementFlowCount();
-      components.leds.blue.on();
-  });
-
-  this.loop(ROTATE_MESSAGE_INTERVAL, function() {
-    try {
-      components.lcd.displayRandomMessage();
-    } catch (e) {
-      log("ErrorInBoot",e);
-    }
-  });
-
-  initReaders();
-
-  this.loop(PUBLISH_INTERVAL, function() {
-      try {
-        for (var i = 0, len = logs.length; i < len; i++) {
-          device.publish(logtopic, JSON.stringify(logs[i]));
+  initLCD();
+  lcd.startAutoScroll();
+  configUpdate.take(function() {
+    async.parallel([startupRoutine, initSensors], function() { 
+      initReaders();
+      board.loop(PUBLISH_INTERVAL, function() {
+        try {
+          for (var i = 0, len = logs.length; i < len; i++) {
+            device.publish(logtopic, JSON.stringify(logs[i]));
+            if (options.verbose) {
+              board.info('PublishLog', JSON.stringify(logs[i]));
+            }
+          }
+          logs = [];
+        } catch (e) {
           if (options.verbose) {
-            board.info('PublishLog', JSON.stringify(logs[i]));
+            board.info('ErrorLog','Error publishing log.' + e);
           }
         }
-        logs = [];
-      } catch (e) {
-        if (options.verbose) {
-          board.info('ErrorLog','Error publishing log.' + e);
-        }
-      }
-      components.leds.green.on();
-      components.leds.blue.off();
-      device.publish(topic, generatePayload());
-      setTimeout(function() {
-        components.leds.green.off();
-      }, 100);
+        components.leds.green.on();
+        components.leds.blue.off();
+        device.publish(topic, generatePayload());
+        setTimeout(function() {
+          components.leds.green.off();
+        }, 100);
+      });
+    });
   });
-
 });

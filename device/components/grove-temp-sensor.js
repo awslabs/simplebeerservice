@@ -1,7 +1,7 @@
 var GroveSensor = require("./grove-sensor.js");
 
-TempSensor = function(pin) {
-  GroveSensor.call(this, { pin : pin });
+TempSensor = function(pin, freq) {
+  GroveSensor.call(this, { pin : pin, freq: freq });
 };
 
 TempSensor.prototype = Object.create(GroveSensor.prototype, {

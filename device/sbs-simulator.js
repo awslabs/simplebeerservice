@@ -21,13 +21,14 @@ const commandLineArgs = require('command-line-args');
 const optionDefinitions = [
   { name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
   { name: 'region', alias: 'r', type: String, defaultValue: config.region },
-  { name: 'unitid', alias: 'u', type: String, defaultValue: config.deviceId }
+  { name: 'unitid', alias: 'u', type: String, defaultValue: config.thingName },
+  { name: 'topicName', alias: 't', type: String, defaultValue: config.topicName }
 ];
 const options = commandLineArgs(optionDefinitions);
 
 var data = [];
 try {
-  var device = awsIot.device({
+  var device = awsIot.thingShadow({
     keyPath: "cert/private.pem.key",
     certPath: "cert/certificate.pem.crt",
     caPath: "cert/root.pem.crt",
@@ -35,7 +36,7 @@ try {
     region: options.region
   });
 
-  var topic = "test/"+options.unitid;
+  var topic  = options.topicName + "/" + options.unitid;
 
   var messages = [
     {"line1":"I :heart: beer!","line2":"How about you?"},
@@ -56,8 +57,7 @@ try {
       "data": data
     }
     data = [];
-    console.log("Payload: ", "eyAidGVzdCI6ICJ0ZXN0IiB9");
-    return "eyAidGVzdCI6ICJ0ZXN0IiB9";
+    return JSON.stringify(payload);
   }
 
   // Generates a random flow count every 10 iterations.
@@ -107,7 +107,11 @@ try {
     populateData('Temperature', temp);
     populateData('Humidity', humidity);
     populateData('Sound', sound);
-    device.publish(topic, generatePayload());
+    var payload = generatePayload();
+    console.log(topic,payload);
+    device.publish(topic, payload,{ qos: 0, retain: false }, (err)=>{
+      if(err) console.log("err:" , err)
+    });
   }
 
   // Sets only a random value for the Sound sensor.
@@ -117,17 +121,44 @@ try {
     populateData('Temperature', 14);
     populateData('Humidity', 55);
     populateData('Sound', sound);
-    device.publish(topic, generatePayload());
+    device.publish(topic, generatePayload(),{},(err)=>{
+      console.log(err)
+    });
   }
 
   // Connect to AWS IoT and setup Intervals
   console.log("Connecting to AWS IoT...");
   device.on("connect", function() {
-    console.log("Connected to AWS IoT.");
-    setInterval(consistent, 1000);
-    setInterval(function() {
-      console.log("Message: ",messages[Math.floor(Math.random()*4)]);
-    },10000);
+    console.log("registering...")
+    device.register( options.unitid, {}, function() {
+      console.log("registered");
+      var sbsState = {
+        "state":{
+          "desired": {
+            "data": {
+              "temp": 10,
+              "humidity": 43
+            },
+            "color":[100,150,155],
+            "full":"simpleBeerEdison",
+            "short":"edison"
+          }
+        }
+      };
+      var clientTokenUpdate = device.update( options.unitid, sbsState );
+      if (clientTokenUpdate === null)
+           {
+              console.log('update shadow failed, operation still in progress');
+           }else{
+             console.log("token:",clientTokenUpdate)
+             console.log("Connected to AWS IoT.");
+             setInterval(run, 1000);
+             setInterval(function() {
+               console.log("Message: ",messages[Math.floor(Math.random()*4)]);
+             },10000);
+           }
+    });
+
   });
 
 } catch (e) {
