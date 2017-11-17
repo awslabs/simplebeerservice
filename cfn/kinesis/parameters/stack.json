@@ -1,0 +1,32 @@
+[
+  {
+    "ParameterValue": "sbs",
+    "UsePreviousValue": false,
+    "ParameterKey": "ResourcePrefix"
+  },
+  {
+    "ParameterValue": "aod6gqe57hyrj.iot.us-west-2.amazonaws.com",
+    "UsePreviousValue": false,
+    "ParameterKey": "IotEndpoint"
+  },
+  {
+    "ParameterValue": "sbs-stream",
+    "UsePreviousValue": false,
+    "ParameterKey": "StreamName"
+  },
+  {
+    "ParameterValue": "150",
+    "UsePreviousValue": false,
+    "ParameterKey": "Timeout"
+  },
+  {
+    "ParameterValue": "256",
+    "UsePreviousValue": false,
+    "ParameterKey": "MemorySize"
+  },
+  {
+    "ParameterValue": "16",
+    "UsePreviousValue": false,
+    "ParameterKey": "BatchSize"
+  }
+]
