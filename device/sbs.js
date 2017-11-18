@@ -239,7 +239,6 @@ function startupRoutine(callback) {
                 "state" : {
                   "reported": {
                     "device": {
-                      "interfaces": ifaces,
                       "config": config
                     },                  
                   }
