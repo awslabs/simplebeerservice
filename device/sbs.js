@@ -56,16 +56,22 @@ if (options.verbose) {
   });
 }
 
-var PUBLISH_INTERVAL = config.intervals.publish;
+var PUBLISH_TOPIC = config.intervals.topic;
+var PUBLISH_SHADOW = config.intervals.shadow;
 
 var unitID = options.unitid;
-var device = awsIot.thingShadow({
-    keyPath: config.certs.privateKey,
-    certPath: config.certs.certificate,
-    caPath: config.certs.caCert,
-    clientId: options.unitid,
-    region: options.region
-});
+var device = awsIot.thingShadow(
+    {
+      keyPath: config.certs.privateKey,
+      certPath: config.certs.certificate,
+      caPath: config.certs.caCert,
+      clientId: options.unitid,
+      region: options.region
+    },
+    {
+      operationTimeout: 30000 // 30 seconds
+    }
+);
 
 var logs = [];
 var data = [];
@@ -228,7 +234,7 @@ function startupRoutine(callback) {
 
     try {
       device.on("connect", function() {
-          device.register( options.unitid, {}, function() {
+        device.register(options.unitid, { enableVersioning: false }, function() {  // disable versioning for device shadow updating, as we also have lambda updating shadow
 
             shadowAccess.take(function() {
               token = device.get(options.unitid);
@@ -254,7 +260,7 @@ function startupRoutine(callback) {
 
         device.on('status',
         function(thingName, stat, clientToken, stateObject) {
-           console.log('received '+stat+' on '+thingName+': '+
+           console.log('received ' + stat + ' on ' + thingName + ' with token ' + clientToken + ': ' +
                        JSON.stringify(stateObject));
            updateFromShadow(stateObject, false);
            shadowAccess.leave();
@@ -305,7 +311,7 @@ board.on("ready", function() {
   configUpdate.take(function() {
     async.parallel([startupRoutine, initSensors], function() { 
       initReaders();
-      board.loop(PUBLISH_INTERVAL, function() {
+      board.loop(PUBLISH_TOPIC, function() {
         try {
           for (var i = 0, len = logs.length; i < len; i++) {
             device.publish(logtopic, JSON.stringify(logs[i]));
@@ -326,6 +332,27 @@ board.on("ready", function() {
           components.leds.green.off();
         }, 100);
       });
+      board.loop(PUBLISH_SHADOW, function () {
+        var sensordata = {};
+        for (var sensor in components.sensors) {
+          sensordata[sensor] = components.sensors[sensor].read()
+        }
+        sensordata.Humidity = 43; // Hack - hard-coded for now until humidity sensor can be made to work
+        kegdata.sensors = sensordata
+        shadowAccess.take(function () {
+          var sbsState = {
+            "state": {
+              "reported": {
+                "kegdata": {
+                  "sensors": kegdata.sensors
+                }
+              }
+            }
+          };
+          device.update(options.unitid, sbsState);
+        });
+      });
+
     });
   });
 });

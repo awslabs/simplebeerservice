@@ -5,8 +5,9 @@
     "region": "us-east-1",
     "intervals": {
         "rotateMessages": 30000,
-        "publish": 1020,
-        "autoScroll": 400
+        "autoScroll": 400,
+        "topic": 1020,
+        "shadow": 300000
     },
     "topicName": "simpleBeerEdisonTopic",
     "logTopic": "simpleBeerEdisonTopicLogs",
