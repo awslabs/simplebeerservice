@@ -46,7 +46,6 @@ Resources:
         ZipFile:
           "Fn::Sub":
             - |-
-              console.log('Loading function');
               var AWS = require('aws-sdk');
               var MILLILS_TO_L = 0.001;
 
@@ -59,7 +58,6 @@ Resources:
                   let b = new Buffer(record.kinesis.data, 'base64');
                   let obj = JSON.parse(b.toString('utf8'));
                   let thingName = obj.deviceId;
-                  console.log('obj', JSON.stringify(obj, null, 2));
                   for (let data of obj.data) {
                     if (data.type === 'Flow') {
 
@@ -71,12 +69,8 @@ Resources:
                   }
                 }
 
-                console.log('final', JSON.stringify(results, null, 2));
-
                 let numRunningAsync = 0;  // Keeping track of callbacks.
-
                 for (let thing_name in results) {
-
                   if (results[thing_name] === 0) {
                     console.log('Zero flow; Will not update shadow for ' + thing_name);
                     continue;  // Don't bother updating shadow.
@@ -93,15 +87,14 @@ Resources:
                       console.log(err, err.stack);
                     } else {
                       let shadow = JSON.parse(data.payload);
-                      console.log('Current shadow', JSON.stringify(shadow, null, 2));
 
                       // Update the thing shadow.
                       delete shadow.state.delta;
 
                       shadow.state.desired.kegdata.usage += results[thing_name];
 
-                      if (shadow.state.desired.kegdata.usage < 0) {
-                        console.error('Negative beer level set for ' + thing_name + ' . Calibration required?');
+                      if (shadow.state.desired.kegdata.usage >  shadow.state.desired.kegdata.size) {
+                        shadow.state.desired.kegdata.usage = shadow.state.desired.kegdata.size
                       }
 
                       var params = {
@@ -111,11 +104,11 @@ Resources:
 
                       iotdata.updateThingShadow(params, function(err, data) {
                         numRunningAsync--;
-                        console.log('Intended new shadow for ' + thing_name, JSON.stringify(shadow, null, 2));
+                        console.log('Intended new shadow for ' + thing_name);
                         if (err) {
                           console.log(err, err.stack);
                         } else {
-                          console.log('Updated shadow successfully for ' + thing_name, JSON.stringify(data, null, 2));
+                          console.log('Updated shadow successfully for ' + thing_name);
 
                           if (numRunningAsync === 0) {
                             callback(null, 'done');
