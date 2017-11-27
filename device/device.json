@@ -5,8 +5,9 @@
     "region": "us-east-1",
     "intervals": {
         "rotateMessages": 30000,
-        "publish": 1020,
-        "autoScroll": 400
+        "autoScroll": 400,
+        "topic": 1020,
+        "shadow": 300000
     },
     "topicName": "simpleBeerEdisonTopic",
     "logTopic": "simpleBeerEdisonTopicLogs",
@@ -47,9 +48,9 @@
             "color": "#f442ce"
         },
         {
-            "line1": "Beer is at %2f%% used.",
+            "line1": "Beer is at %2.0f%% used.",
             "line1vars": ["used"],
-            "line2": "Only %f liters left!",
+            "line2": "Only %.2f liters left!",
             "line2vars": ["left"],
              "color": "#f2a7e2"
         }
