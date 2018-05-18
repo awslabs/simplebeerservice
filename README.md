@@ -181,8 +181,7 @@ So, we have our environment all setup, let's create the resources we need within
 ![](readme-images/iot-manage-policies.png)  
 
 3. Allow access to all of IoT for this demo by adding policy statements **iot:\*** and **\*** for *Action* and *Resource ARN*.  
-Be sure to check the **Allow** box and then click **Create**.  
-<img src="readme-images/iot-create-policy.png" width="800">
+Be sure to check the **Allow** box and then click **Create**.  <img src="readme-images/iot-create-policy.png" width="800">
 
 4. Next we are going to add our thing. Click **Manage** and then **Things** on the lefthand section of the console page.  
 ![](readme-images/iot-manage-things.png)  
