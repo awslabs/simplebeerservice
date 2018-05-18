@@ -71,20 +71,17 @@ Now create a new IAM user as follows:
 <img src="readme-images/iam-create-user.png" width="300">
 
 2. Name your user accordingly.  
-  ![Users List](readme-images/iam-users-list.png)  
-
-  Check the **Programmatic access** checkbox.  
-
-  ![Users List](readme-images/iam-user-access-type.png)  
-
-  Click **Next: Permissions**.
+![Users List](readme-images/iam-users-list.png)  
+Check the **Programmatic access** checkbox.  
+![Users List](readme-images/iam-user-access-type.png)  
+Click **Next: Permissions**.
 
 3. Next, we will set permissions for this user. Click **Attach existing policies directly**.  
 ![Creds](readme-images/iam-attach-existing-policies.png)  
 For today's lab, we will give this user *Administrator Access*. Start typing *AdministratorAcc* in the search box and it will filter to the **AdministratorAccess** managed policy. Click on the checkbox and click **Next:Review** in lower righthand corner and **Create user** on the page that follows.  
 ![Creds](readme-images/iam-admin-access.png)  
 
- > **Note**: The Administrator Access policy gives virtually unlimited privileges within your AWS account. Today, you will have the choice to build out custom components to your SBS application, which could use any service. For this reason, we are giving broad access to you as a developer. However, it would be advised to review this permission, following [IAM Best Practices](http://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html).
+> **Note**: The Administrator Access policy gives virtually unlimited privileges within your AWS account. Today, you will have the choice to build out custom components to your SBS application, which could use any service. For this reason, we are giving broad access to you as a developer. However, it would be advised to review this permission, following [IAM Best Practices](http://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html).  
 
 4. Click the **Download .csv** button and save the access keys to your computer.  
 ![Creds](readme-images/iam-creds.png)
