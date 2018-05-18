@@ -67,16 +67,15 @@ Click **Users** on the left-hand panel.
 
 Now create a new IAM user as follows:
 
-1. Create a new user by clicking **Add User** in the *IAM Console*.
-<img src="readme-images/iam-create-user.png" width="300">
+1. Create a new user by clicking **Add User** in the *IAM Console*.  
+  <img src="readme-images/iam-create-user.png" width="300">
 
-2. Name your user accordingly.
+2. Name your user accordingly.  
+  ![Users List](readme-images/iam-users-list.png)  
 
-  ![Users List](readme-images/iam-users-list.png)
+  Check the **Programmatic access** checkbox.  
 
-  Check the **Programmatic access** checkbox.
-
-  ![Users List](readme-images/iam-user-access-type.png)
+  ![Users List](readme-images/iam-user-access-type.png)  
 
   Click **Next: Permissions**.
 
@@ -185,8 +184,8 @@ So, we have our environment all setup, let's create the resources we need within
 2. Click **Secure** and then **Policies** on the lefthand section of the console page.  **Create** a new IoT policy.  
 ![](readme-images/iot-manage-policies.png)  
 
-3. Allow access to all of IoT for this demo by adding policy statements **iot:\*** and **\*** for *Action* and *Resource ARN* respectively.  
-Be sure to check the **Allow** box and then click **Create**.
+3. Allow access to all of IoT for this demo by adding policy statements **iot:\*** and **\*** for *Action* and *Resource ARN*.  
+Be sure to check the **Allow** box and then click **Create**.  
 <img src="readme-images/iot-create-policy.png" width="800">
 
 4. Next we are going to add our thing. Click **Manage** and then **Things** on the lefthand section of the console page.  
@@ -205,8 +204,7 @@ Be sure to check the **Allow** box and then click **Create**.
 ![](readme-images/iot-create-certificate.png)
 
 9. Click on each link to download the **certificate**, **private key**, and **public key**.  After downloading your keys, click **Activate**.  
-
-  ![](readme-images/iot-certificate-activate.png)
+![](readme-images/iot-certificate-activate.png)
   > **Important!!**  
 > From the command line in your project directory:  `mkdir ./device/certs`  
   Now save these certificates to the **simplebeerservice/device/certs** folder in your project directory.  
@@ -307,7 +305,7 @@ While this application is running, to see if it is actually coming into AWS IoT,
 
 2. Click on **Test** in the lefthand column.  
 
-3. Click on **Subscribe to Topic**. Type in *sbs/#* in the topic name field and press **Subscribe**.
+3. Under *Subscription topic*, type in *sbs/#* in the topic name field and press **Subscribe to topic**.  
 ![](readme-images/iot-mqtt-subscribe.png)
 
 You now should see messages flowing in here!
@@ -324,7 +322,7 @@ cd <path/to/simplebeerservice/client>
 
 Before we get going, here is a quick intro to a tool called **Gulp**. Gulp is a task manager for Node.js applications. It enables us to wire up commands that will perform common tasks. Here are a few we will use today. Go ahead and try them out!
 
-> ```
+>```
 gulp serve
 ```
 > This command will run a local webserver that is listening for any changes to your app directory. If there are an file changes, it will reload the local running web application. This is great for development, as you can see changes live as you update the code.
