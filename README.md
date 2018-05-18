@@ -68,7 +68,7 @@ Click **Users** on the left-hand panel.
 Now create a new IAM user as follows:
 
 1. Create a new user by clicking **Add User** in the *IAM Console*.  
-<img src="readme-images/iam-create-user.png" width="300">
+![Users List](readme-images/iam-create-user.png)
 
 2. Name your user accordingly.  
 ![Users List](readme-images/iam-users-list.png)  
