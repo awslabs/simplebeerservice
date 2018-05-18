@@ -13,13 +13,13 @@ Welcome to the Simple Beer Service developer bootcamp! I am excited to onboard *
 
 You will need the following tools to get started today.
 
-1. An AWS account, of course! [Create one today!](https://aws.amazon.com/getting-started/)
+1. An AWS account, of course! [Create one today!](https://aws.amazon.com/free/)
 2. A GitHub account. Need one? [Create one today!](https://github.com/join)
 3. The version control system Git. [Install here.](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 4. Recent version of Node.js installed. [Download here.](https://nodejs.org/en/download/)
 5. A text editor.. I recommend Atom. [Download here.](https://atom.io/)
 
-That's it for the prereqs! Now, let's install all the pre-reqs setup.
+That's it for the pre-reqs! Now, let's install all the pre-reqs setup.
 
 ### Installing a few crucial node packages.
 
@@ -59,30 +59,40 @@ sudo pip install awscli --ignore-installed six
 
 #### Configure the CLI:
 
-First, sign in to the AWS.
-Under **My Account** drop down menu,  
-Choose **AWS Management Console**.  
-Find the section: **Security & Identity**,  
-Choose **Identity & Access Management** (aka IAM)  
+First, sign in to the AWS Management Console and open the Identity and Access Management (aka *IAM*) console [here](https://console.aws.amazon.com/iam/).  
+
+Click **Users** on the left-hand panel.
+
+
 
 Now create a new IAM user as follows:
 
-1. Create a new user by clicking **Create User** in the *IAM Console*.
-<img src="readme-images/iam-create-user.png" width="400">
+1. Create a new user by clicking **Add User** in the *IAM Console*.
+<img src="readme-images/iam-create-user.png" width="300">
 
-2. Name your user accordingly. Ensure the *Generate an access key* is checked.
-![Users List](readme-images/iam-users-list.png)
+2. Name your user accordingly.
 
-3. Save the access keys to your computer.
-![Creds](readme-images/iam-creds.png)
+  ![Users List](readme-images/iam-users-list.png)
 
-4. Next, press **Close** and click on the newly created user. Click on the **Permissions** tab.
-![Creds](readme-images/iam-policies.png)
+  Check the **Programmatic access** checkbox.
 
-5. For today's lab, we will give this user *Administrator Access*. Click **Attach Policy** in the section *Managed Policies*. This will lead you to a new screen. Start typing *AdministratorAcc* and it will filter to the **AdministratorAccess** managed policy. Click on the checkbox and press **Attach Policy**
+  ![Users List](readme-images/iam-user-access-type.png)
+
+  Click **Next: Permissions**.
+
+3. Next, we will set permissions for this user. Click **Attach existing policies directly**.
+![Creds](readme-images/iam-attach-existing-policies.png)
+
+ For today's lab, we will give this user *Administrator Access*. Start typing *AdministratorAcc* in the search box and it will filter to the **AdministratorAccess** managed policy. Click on the checkbox and click **Next:Review** in lower righthand corner and **Create user** on the page that follows.
 ![Creds](readme-images/iam-admin-access.png)
 
-> **Note**: The Administrator Access policy gives virtually unlimited privileges within your AWS account. Today, you will have the choice to build out custom components to your SBS application, which could use any service. For this reason, we are giving broad access to you as a developer. However, it would be advised to review this permission, following [IAM Best Practices](http://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html).  
+ > **Note**: The Administrator Access policy gives virtually unlimited privileges within your AWS account. Today, you will have the choice to build out custom components to your SBS application, which could use any service. For this reason, we are giving broad access to you as a developer. However, it would be advised to review this permission, following [IAM Best Practices](http://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html).
+
+4. Click the **Download .csv** button and save the access keys to your computer.  
+![Creds](readme-images/iam-creds.png)
+
+
+
 
 Now that you have an IAM user and the CLI is installed, you can configure the CLI by using this command:
 
@@ -169,28 +179,41 @@ This will now launch a CloudFormation template that will include all of the reso
 
 So, we have our environment all setup, let's create the resources we need within AWS IoT so we can start sending some data.
 
-1. Open the AWS IoT Console.
-2. Click **Create Resource** on the top section of the console page.
-![](readme-images/iot-create-resource.png)
-3. Click the **Create Thing** box. Name the thing and press the **Create** button.
-![](readme-images/iot-create-thing.png)
-4. Click the **Create Certificates** box. Check the box *Activate* and then press the **1-click certificates** button.
+1. Open the AWS IoT console
+[here](https://console.aws.amazon.com/iot/home) and click **Get Started**.
+
+2. Click **Secure** and then **Policies** on the lefthand section of the console page.  **Create** a new IoT policy.  
+![](readme-images/iot-manage-policies.png)  
+
+3. Allow access to all of IoT for this demo by adding policy statements **iot:\*** and **\*** for *Action* and *Resource ARN* respectively.  
+Be sure to check the **Allow** box and then click **Create**.
+<img src="readme-images/iot-create-policy.png" width="800">
+
+4. Next we are going to add our thing. Click **Manage** and then **Things** on the lefthand section of the console page.  
+![](readme-images/iot-manage-things.png)  
+
+5. Click the **Register a thing** box.  
+<img src="readme-images/iot-register-thing.png" width="300">  
+
+6. Click **Create a single thing**.
+![](readme-images/iot-create-single-thing.png)  
+
+7. Name your thing and click **Next** at the bottom of the page.
+![](readme-images/iot-name-thing.png)  
+
+8. Click the **Create Certificate** box.
 ![](readme-images/iot-create-certificate.png)
-5. Click on each link to download the **certificate**, **private key**, and **public key**.
-> **Important!!**  
+
+9. Click on each link to download the **certificate**, **private key**, and **public key**.  After downloading your keys, click **Activate**.  
+
+  ![](readme-images/iot-certificate-activate.png)
+  > **Important!!**  
 > From the command line in your project directory:  `mkdir ./device/certs`  
-Now save these certificates to the **simplebeerservice/device/certs** folder in your project directory.  
+  Now save these certificates to the **simplebeerservice/device/certs** folder in your project directory.  
 You will also need one more file, the VeriSign root certificate. [Download that certificate here](https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem) and save it to the same certs directory.
 
-6. Click the **Create Policy** box. Allow access to all of IoT for this demo, but selecting **iot:\*** and **\***.
-![](readme-images/iot-create-policy.png)
-7. Make sure to click on the **Create** button at the bottom.
-![](readme-images/iot-create-policy-button.png)
-8. Attach the policy and thing to the certificate, by clicking the *checkbox* on the certificate and the respective links in the dropdown menu **Actions**.
-![](readme-images/iot-attach-policy.png)
-![](readme-images/iot-attach-policy-confirm.png)
-![](readme-images/iot-attach-thing.png)
-![](readme-images/iot-attach-thing-confirm.png)
+10. Click the **Attach a Policy** box. Select the policy you created in steps 1-2 and click **Register Thing**.
+![](readme-images/iot-attach-policy.png)  
 
 **Congratulations! You can now publish to AWS IoT!**
 
@@ -198,7 +221,8 @@ You will also need one more file, the VeriSign root certificate. [Download that 
 
 For the subscribing web application, we will be creating a Cognito Identity Pool to authenticate and authorize the end user to get data from our endpoint.
 
-1. Open the **Amazon Cognito** Console.
+1. Open the AWS Cognito console
+[here](https://console.aws.amazon.com/cognito/home).
 2. Click **Manage Federated Identities**
 ![](readme-images/cognito-front.png)
 > **What is Cognito User Pools?**
@@ -209,16 +233,14 @@ For the subscribing web application, we will be creating a Cognito Identity Pool
 4. Click the dropdown for **Authentication Providers**. Note the different options you have here. You could link up a *Cognito User Pool*, or use one of the popular identity providers mentioned. For this bootcamp, we will not need to set this up.
 5. Press **Create Pool**.
 6. Next, it will bring us to a screen where we can setup the IAM roles that will be assumed by both an *Unauthenticated User* and an *Authenticated User*. Look at the policy documents to see how they are structured. Then press **Allow**.
-7. The final step is to give permission to an *Unauthenticated User* to subscribe to our AWS IoT Topic. To do this, click back to the list of AWS Services and open the **AWS Identity & Access Management Console**.
+7. The final step is to give permission to an *Unauthenticated User* to subscribe to our AWS IoT Topic. To do this, open the *IAM Console* [here](https://console.aws.amazon.com/iam/).
 8. On the left menu, click **Roles**.
 9. You will see all of your roles here. There is one role titled **Cognito_<YOUR_APP_NAME>UnauthRole**. Click on this role.
-10. Under *Inline Policies*, press **Create Role Policy** to create a new inline IAM policy.
-![](readme-images/iam-permissions.png)
-11. Select the box **Custom Policy** and press **Select**.
-![](readme-images/iam-create-new-policy.png)
-12. Name the policy and copy and paste the following JSON text. **Remember to replace <REPLACE_WITH_ACCOUNT_NUMBER> with your actual account number**.
+10. Under the *Permissions* tab, click **Add inline policy** to create a new inline IAM policy.
+11. Click on the **JSON** tab and paste the following JSON text.  
+ **Remember to replace <REPLACE_WITH_ACCOUNT_NUMBER> with your actual account number**.
 
-```json
+ ```json
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -241,9 +263,9 @@ For the subscribing web application, we will be creating a Cognito Identity Pool
 }
 ```
 
-> **Note:** Replace *<REPLACE_WITH_ACCOUNT_NUMBER>* with your actual account number and *<REGION>* with the region you are using.
+ > **Note:** Replace *<REPLACE_WITH_ACCOUNT_NUMBER>* with your actual account number and *<REGION>* with the region you are using.
 
-13. Press **Apply Policy** and you are done!
+13. Name the policy and click **Create Policy**.
 
 **Congratulations! You have successfully created your Cognito Identity Pool**
 
@@ -280,9 +302,11 @@ You should see successful post messages.
 
 While this application is running, to see if it is actually coming into AWS IoT, let's check out the MQTT Client in the AWS IoT Console.
 
-1. Open the AWS IoT Console.
-2. Click on **MQTT Client**. Type in *test* into the Client ID field and press **Connect**
-![](readme-images/iot-mqtt-connect.png)
+1. Open the AWS IoT console
+[here](https://console.aws.amazon.com/iot/home) and click **Get Started**.  
+
+2. Click on **Test** in the lefthand column.  
+
 3. Click on **Subscribe to Topic**. Type in *sbs/#* in the topic name field and press **Subscribe**.
 ![](readme-images/iot-mqtt-subscribe.png)
 
