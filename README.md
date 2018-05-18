@@ -80,10 +80,9 @@ Now create a new IAM user as follows:
   Click **Next: Permissions**.
 
 3. Next, we will set permissions for this user. Click **Attach existing policies directly**.  
-![Creds](readme-images/iam-attach-existing-policies.png)
-
-  For today's lab, we will give this user *Administrator Access*. Start typing *AdministratorAcc* in the search box and it will filter to the **AdministratorAccess** managed policy. Click on the checkbox and click **Next:Review** in lower righthand corner and **Create user** on the page that follows.  
-  ![Creds](readme-images/iam-admin-access.png)
+![Creds](readme-images/iam-attach-existing-policies.png)  
+For today's lab, we will give this user *Administrator Access*. Start typing *AdministratorAcc* in the search box and it will filter to the **AdministratorAccess** managed policy. Click on the checkbox and click **Next:Review** in lower righthand corner and **Create user** on the page that follows.  
+![Creds](readme-images/iam-admin-access.png)  
 
  > **Note**: The Administrator Access policy gives virtually unlimited privileges within your AWS account. Today, you will have the choice to build out custom components to your SBS application, which could use any service. For this reason, we are giving broad access to you as a developer. However, it would be advised to review this permission, following [IAM Best Practices](http://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html).
 
