@@ -169,28 +169,48 @@ This will now launch a CloudFormation template that will include all of the reso
 
 So, we have our environment all setup, let's create the resources we need within AWS IoT so we can start sending some data.
 
-1. Open the AWS IoT Console.
-2. Click **Create Resource** on the top section of the console page.
-![](readme-images/iot-create-resource.png)
-3. Click the **Create Thing** box. Name the thing and press the **Create** button.
-![](readme-images/iot-create-thing.png)
-4. Click the **Create Certificates** box. Check the box *Activate* and then press the **1-click certificates** button.
-![](readme-images/iot-create-certificate.png)
-5. Click on each link to download the **certificate**, **private key**, and **public key**.
+1. Open the AWS IoT Console (pick "IoT Core" in the list of available services). 
+
+![](readme-images/iot-console.png)
+
+2. Click **Secure -> Policies** link on the left side 
+
+![](readme-images/iot-create-policy-new.png)
+
+3. Click the **Create a policy** button. Allow access to all of IoT for this demo, but selecting **iot:\*** and **\***. 
+
+![](readme-images/iot-create-policy-2.png)
+
+4. Make sure to click on the **Create** button at the bottom.
+5. Click **Manage -> Things** link on the left side
+6. Click **Register a thing** button
+7. Click **Create a single thing** button 
+
+![](readme-images/iot-create-thing-2.png) 
+![](readme-images/iot-create-thing-3.png)
+
+8. Click **Next** button
+9. Click **Create certificate** button 
+
+![](readme-images/iot-add-certificate.png)
+
+10. Click **Activate** button
+
+![](readme-images/iot-activate-certificate.png)
+
+Click on each link to download the **certificate**, **private key**, and **public key**.
 > **Important!!**  
 > From the command line in your project directory:  `mkdir ./device/certs`  
 Now save these certificates to the **simplebeerservice/device/certs** folder in your project directory.  
 You will also need one more file, the VeriSign root certificate. [Download that certificate here](https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem) and save it to the same certs directory.
 
-6. Click the **Create Policy** box. Allow access to all of IoT for this demo, but selecting **iot:\*** and **\***.
-![](readme-images/iot-create-policy.png)
-7. Make sure to click on the **Create** button at the bottom.
-![](readme-images/iot-create-policy-button.png)
-8. Attach the policy and thing to the certificate, by clicking the *checkbox* on the certificate and the respective links in the dropdown menu **Actions**.
-![](readme-images/iot-attach-policy.png)
-![](readme-images/iot-attach-policy-confirm.png)
-![](readme-images/iot-attach-thing.png)
-![](readme-images/iot-attach-thing-confirm.png)
+11. Click **Attach a policy** button and select policy you created earlier
+
+![](readme-images/iot-attach-policy-new.png)
+
+12. Click **Register Thing** button 
+
+![](readme-images/iot-thing-created.png)
 
 **Congratulations! You can now publish to AWS IoT!**
 
@@ -300,15 +320,15 @@ cd <path/to/simplebeerservice/client>
 
 Before we get going, here is a quick intro to a tool called **Gulp**. Gulp is a task manager for Node.js applications. It enables us to wire up commands that will perform common tasks. Here are a few we will use today. Go ahead and try them out!
 
-> ```
+```
 gulp serve
 ```
 > This command will run a local webserver that is listening for any changes to your app directory. If there are an file changes, it will reload the local running web application. This is great for development, as you can see changes live as you update the code.
-> ```
+```
 gulp build
 ```
 > This command will package up all of the files you need for your static site and write them into your **/dist/** folder. This is the folder that serverless is using when it publishes your S3 static files.
-> ```
+```
 gulp test
 ```
 > This command will run the unit tests defined in the **/test/** folder. For this project, we have not defined any unit test.
@@ -323,7 +343,7 @@ gulp build
 ```
 4. Change the directory back to the main serverless directory and type:
 ```
-sls client deploy
+sls client deploy -s <your stage name>
 ```
 5. Serverless will output an S3 link. Put that S3 link in your browser and check out your static site!!
 
