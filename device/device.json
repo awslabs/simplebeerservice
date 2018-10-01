@@ -1,40 +1,58 @@
 {
-  "deviceId": "SBS003",
-  "location": "San Francisco",
-  "short": "SFO",
-  "region": "us-east-1",
-  "intervals": {
-    "rotateMessages": 10000,
-    "publish": 1020
-  },
-  "topic": "sbs",
-  "logTopic": "logs",
-  "certs": {
-    "privateKey": "/opt/sbs/cert/private.pem.key",
-    "certificate": "/opt/sbs/cert/certificate.pem.crt",
-    "caCert": "/opt/sbs/cert/root.pem.crt"
-  },
-  "components": {
-      "leds": {
-        "blue": 2,
-        "green": 5,
-        "red": 6
-      },
-      "sensors": {
-        "Sound": "A0",
-        "Temperature": "A1",
-        "Flow": 3,
-        "Proximity": 4
-      }
-  },
-  "api": {
-    "endpoint": "<YOUR_API_ENDPOINT>",
-    "apiKey": "<YOUR_API_KEY>"
-  },
-  "messages": [
-    {"line1":"I :heart: beer!","line2":"How about you?"},
-    {"line1":"Step right up...","line2":"and grab a beer!"},
-    {"line1":"What a beautiful","line2":"day for a beer!"},
-    {"line1":"HEY! YOU!","line2":"Want a beer?"}
-  ]
+    "thingName": "sbs",
+    "location": "Vancouver",
+    "short": "YVR",
+    "region": "us-east-1",
+    "intervals": {
+        "rotateMessages": 30000,
+        "autoScroll": 400,
+        "topic": 1020,
+        "shadow": 300000
+    },
+    "topicName": "simpleBeerEdisonTopic",
+    "logTopic": "simpleBeerEdisonTopicLogs",
+    "certs": {
+        "privateKey": "/opt/sbs/cert/private.pem.key",
+        "certificate": "/opt/sbs/cert/certificate.pem.crt",
+        "caCert": "/opt/sbs/cert/root.pem.crt"
+    },
+    "components": {
+        "leds": {
+            "blue": 2,
+            "green": 5,
+            "red": 6
+        },
+        "sensors": {
+            "Sound": {
+                "pin": "A0"
+            },
+            "Temperature": {
+                "pin": "A1"
+            },
+            "Flow": {
+                "pin": "A2",
+                "freq": 1,
+                "multiplier": 3.2715
+            },
+            "Proximity": {
+                "pin": 4
+            }
+        }
+    },
+    "messages": [
+        {
+            "line1": "Beer: %s, from %s brewery",
+            "line1vars": ["name", "brewery"],
+            "line2": "Description: %s",
+            "line2vars": ["desc"],
+            "color": "#f442ce"
+        },
+        {
+            "line1": "Beer is at %2.0f%% used.",
+            "line1vars": ["used"],
+            "line2": "Only %.2f liters left!",
+            "line2vars": ["left"],
+             "color": "#f2a7e2"
+        }
+    ]
 }
