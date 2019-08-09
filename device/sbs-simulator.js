@@ -56,8 +56,8 @@ try {
       "data": data
     }
     data = [];
-    console.log("Payload: ", "eyAidGVzdCI6ICJ0ZXN0IiB9");
-    return "eyAidGVzdCI6ICJ0ZXN0IiB9";
+    //console.log("Payload: ", payload);
+    return JSON.stringify(payload);
   }
 
   // Generates a random flow count every 10 iterations.
