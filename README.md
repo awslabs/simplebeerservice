@@ -57,6 +57,7 @@ sudo pip install awscli --ignore-installed six
 ```
 > **Note:** You will need to have pip installed in order to run this command. To install pip, follow the instructions [here](https://pip.pypa.io/en/stable/installing/).
 
+ 
 #### Configure the CLI:
 
 First, sign in to the AWS.
@@ -166,6 +167,13 @@ This will now launch a CloudFormation template that will include all of the reso
 **Congrats! You have successfully setup your Serverless enviroment.**
 
 ## Setup AWS IoT
+
+**NOTE**: When you get to the IoT page:
+If you are on the West Coast, it will default to us-west-2.  
+You need to change this to **US East (N. Virginia)**  
+   (address will be: `https://console.aws.amazon.com/iot/home?region=us-east-1#/dashboard?editor=thing`)  
+This can be found under **Region** drop down menu at the top right of the page.
+
 
 So, we have our environment all setup, let's create the resources we need within AWS IoT so we can start sending some data.
 
