@@ -1,0 +1,12 @@
+[
+  {
+    "ParameterValue": "sbs",
+    "UsePreviousValue": false,
+    "ParameterKey": "ResourcePrefix"
+  },
+  {
+    "ParameterValue": "aod6gqe57hyrj.iot.us-west-2.amazonaws.com",
+    "UsePreviousValue": false,
+    "ParameterKey": "IotEndpoint"
+  }
+]

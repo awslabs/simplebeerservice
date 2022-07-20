@@ -1,0 +1,261 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: A 'lambda-to-kinesis' stack for project 'AAA-2017-09-04-kinesis'; rendered on 2017-09-05 by fabricate.
+
+Metadata:
+  CommitHash: a434829f35d4e6c562cfaec90299a8133e34b5e3
+  CommitMessage: "Checkpoint"
+
+Parameters:
+  ResourcePrefix:
+    Type: String
+    Description: A description to identify resources  (e.g. "my-perf-test")
+    MinLength: 2
+
+  StreamName:
+    Type: String
+    MinLength: 2
+
+  IotEndpoint:
+    Type: String
+    MinLength: 2
+
+  Timeout:
+    Type: Number
+    Description: Timeout for the function in seconds
+
+  BatchSize:
+    Type: Number
+    Description: Kinesis batch size
+
+  MemorySize:
+    Type: Number
+    Description: Memory for the function in MB
+
+
+Resources:
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Metadata:
+      Comment:
+        "Fn::Sub":
+          "Function for ${ResourcePrefix}"
+    DependsOn: [ LambdaFunctionExecutionRole ]
+    Properties:
+      Code:
+        ZipFile:
+          "Fn::Sub":
+            - |-
+              var AWS = require('aws-sdk');
+              var MILLILS_TO_L = 0.001;
+
+              exports.handler = function(event, context, callback) {
+
+                let results = {};
+                var iotdata = new AWS.IotData({endpoint: '${endpoint}'});
+
+                for (let record of event.Records) {
+                  let b = new Buffer(record.kinesis.data, 'base64');
+                  let obj = JSON.parse(b.toString('utf8'));
+                  let thingName = obj.deviceId;
+                  for (let data of obj.data) {
+                    if (data.type === 'Flow') {
+
+                      if (!(thingName in results)) {
+                        results[thingName] = 0.0;
+                      }
+                      results[thingName] += data.value * MILLILS_TO_L;
+                    }
+                  }
+                }
+
+                let numRunningAsync = 0;  // Keeping track of callbacks.
+                for (let thing_name in results) {
+                  if (results[thing_name] === 0) {
+                    console.log('Zero flow; Will not update shadow for ' + thing_name);
+                    continue;  // Don't bother updating shadow.
+                  }
+
+                  numRunningAsync++;
+
+                  var params = {
+                    thingName: thing_name
+                  };
+
+                  iotdata.getThingShadow(params, function(err, data) {
+                    if (err) {
+                      console.log(err, err.stack);
+                    } else {
+                      let shadow = JSON.parse(data.payload);
+
+                      // Update the thing shadow.
+                      delete shadow.state.delta;
+
+                      shadow.state.desired.kegdata.usage += results[thing_name];
+
+                      if (shadow.state.desired.kegdata.usage >  shadow.state.desired.kegdata.size) {
+                        shadow.state.desired.kegdata.usage = shadow.state.desired.kegdata.size
+                      }
+
+                      var params = {
+                        payload: JSON.stringify(shadow),
+                        thingName: thing_name
+                      };
+
+                      iotdata.updateThingShadow(params, function(err, data) {
+                        numRunningAsync--;
+                        console.log('Intended new shadow for ' + thing_name);
+                        if (err) {
+                          console.log(err, err.stack);
+                        } else {
+                          console.log('Updated shadow successfully for ' + thing_name);
+
+                          if (numRunningAsync === 0) {
+                            callback(null, 'done');
+                          }
+                        }
+                      });
+
+                    }
+                  });
+
+
+                }
+
+
+
+
+              };
+            - endpoint: { Ref: IotEndpoint }
+
+      Role: { "Fn::GetAtt": [ LambdaFunctionExecutionRole, Arn ] }
+      Timeout: { Ref: Timeout }
+      Handler: index.handler
+      Runtime: nodejs6.10
+      MemorySize: { Ref: MemorySize }
+
+  Policy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+        - { Ref: LambdaFunctionExecutionRole }
+      PolicyName: CommonPolicyForLambdaAndDevelopment
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+            Resource: "arn:aws:logs:*:*:*"
+          - Effect: Allow
+            Action:
+              - "ec2:DescribeSecurityGroups"
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - "kinesis:GetShardIterator"
+              - "kinesis:GetRecords"
+              - "kinesis:DescribeStream"
+              - "kinesis:ListStreams"
+            Resource:
+              "Fn::GetAtt": [Stream, Arn]
+          - Effect: Allow
+            Action:
+              - "kinesis:ListStreams"
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - "iot:GetThingShadow"
+              - "iot:UpdateThingShadow"
+            Resource: "*"
+
+
+  # The IAM role that the lambda function will execute under.
+  LambdaFunctionExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ lambda.amazonaws.com ]
+            Action:
+              - sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              AWS:
+                - "Fn::Join":
+                  - ""
+                  - - "arn:aws:iam::"
+                    - { Ref: "AWS::AccountId" }
+                    - ":"
+                    - "root"
+            Action:
+              - sts:AssumeRole
+      Path: /
+      # # Optional:
+      # ManagedPolicyArns:
+      #   - arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
+
+  IoTExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ iot.amazonaws.com ]
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: kinesis-put
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "kinesis:PutRecord"
+                Resource:
+                  "Fn::GetAtt": [Stream, Arn]
+
+  Stream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: { Ref: StreamName }
+      ShardCount: 1
+
+  StreamEventSource:
+    Type: AWS::Lambda::EventSourceMapping
+    DependsOn: [ Policy ]
+    Properties:
+      FunctionName: { Ref: LambdaFunction }
+      BatchSize: { Ref: BatchSize }
+      Enabled: true
+      EventSourceArn:
+        "Fn::GetAtt": [Stream, Arn]
+      StartingPosition: TRIM_HORIZON
+
+
+
+Outputs:
+  LambdaFunction:
+    Value: { Ref : LambdaFunction }
+  LambdaFunctionARN:
+    Value: { "Fn::GetAtt": [ LambdaFunction, Arn ] }
+  LambdaFunctionExecutionRole:
+    Value: { Ref : LambdaFunctionExecutionRole }
+  LambdaFunctionExecutionRoleARN:
+    Value: { "Fn::GetAtt": [ LambdaFunctionExecutionRole, Arn ] }
+  SigninUrl:
+    Value:
+      "Fn::Sub": |
+        https://signin.aws.amazon.com/switchrole?account=${AWS::AccountId}&roleName=${LambdaFunctionExecutionRole}&displayName=assumed-role
+  TestCommand:
+    Value:
+      "Fn::Sub": |
+        aws lambda invoke --function-name ${LambdaFunction} /tmp/${LambdaFunction}-output.txt; cat /tmp/${LambdaFunction}-output.txt

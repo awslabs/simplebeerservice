@@ -1,0 +1,28 @@
+{
+  "name": "client",
+  "private": true,
+  "dependencies": {
+    "bootstrap-sass": "~3.3.5",
+    "modernizr": "~2.8.1",
+    "smoothie": "^1.27.0",
+    "aws-iot-device-sdk": "^1.0.12",
+    "async": "^1.5.2",
+    "paho-mqtt-js": "~1.0.1",
+    "cryptojslib": "~3.1.2",
+    "aws-sdk": "aws-sdk-js#^2.3.19",
+    "moment": "^2.13.0"
+  },
+  "overrides": {
+    "bootstrap-sass": {
+      "main": [
+        "assets/stylesheets/_bootstrap.scss",
+        "assets/fonts/bootstrap/*",
+        "assets/javascripts/bootstrap.js"
+      ]
+    }
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3"
+  }
+}

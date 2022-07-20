@@ -1,0 +1,12 @@
+{
+  "name": "serverless-simplebeerservice",
+  "custom": {
+    "client": {
+        "bucketName": "${stage}.${domain}"
+    }
+  },
+  "plugins": [
+    "serverless-client-s3",
+    "serverless-cors-plugin"
+  ]
+}
